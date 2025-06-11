@@ -49,9 +49,21 @@ public class Player : MonoBehaviour
     private int BonusPoints;
 
     /// <summary>
+    /// The arrow prefab to be instantiated when the player uses a bow.
+    /// </summary>
+    [SerializeField]
+    private GameObject ArrowPrefab;
+
+    /// <summary>
     /// The input for player movement.
     /// </summary>
     private Vector3 movementInput;
+    
+    private Vector3 previousPosition;    
+    /// <summary>
+    /// The velocity of the player's movement.
+    /// </summary>
+    private Vector3 movementVelocity => (transform.position - previousPosition) / Time.deltaTime;
 
     /// <summary>
     /// Animation controller for player actions.
@@ -123,6 +135,8 @@ public class Player : MonoBehaviour
             animator.Play(attackAnimation);
             animator.speed = 1;
             states["Attack"] = true;
+            if (weapon == Weapon.Bow)
+                LaunchArrow(); // Lancer une flèche si le joueur utilise un arc
             StartCoroutine(ResetAnimator());
         };
     }
@@ -145,10 +159,10 @@ public class Player : MonoBehaviour
             animator.Play("Idle");
     }
 
-    void Update() => Move();
-
-    void Move()
+    void Update()
     {
+        previousPosition = transform.position;
+
         if (!(movementInput.x == 0 && movementInput.z == 0))
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new(movementInput.x, 0, movementInput.z)), rotationSpeed * Time.deltaTime);
 
@@ -157,7 +171,62 @@ public class Player : MonoBehaviour
         movementInput.y -= gravity * Time.deltaTime;
         controller.Move(movementInput * speed * Time.deltaTime);
     }
-    
+
+    void LaunchArrow()
+    {
+        if (weapon != Weapon.Bow)
+            return;
+
+        FireArrow(FindTargetInView(), 0.5f); // Tirer une flèche courbée
+        Debug.Log("Arrow launched!");
+    }
+
+    Transform FindTargetInView(float viewAngle = 50, float viewDistance = 10)
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, viewDistance); // Détection dans un rayon
+        Transform bestTarget = null;
+        float bestAngle = viewAngle; // Angle maximal autorisé
+
+        foreach (Collider col in colliders)
+        {
+            if (!col.CompareTag("Player") || col.transform == transform)
+                continue; // Ignorer les objets qui ne sont pas des joueurs ou soi-même
+
+            Transform target = col.transform;
+            Vector3 directionToTarget = (target.position - transform.position).normalized;
+            float angle = Vector3.Angle(transform.forward, directionToTarget);
+
+            if (angle < viewAngle * 0.5f && angle < bestAngle) // Si la cible est bien devant
+            {
+                bestTarget = target;
+                bestAngle = angle; // Garder la meilleure cible dans le champ de vision
+            }
+        }
+        return bestTarget; // Retourner la meilleure cible ou null
+    }
+
+    void FireArrow(Transform target, float predictionTime)
+    {
+        Debug.Log($"Firing arrow at target: {target?.name}");
+        Vector3 targetPosition = target ?
+            targetPosition = target.position + Vector3.up * 0.5f /*+ target.GetComponent<Player>().movementVelocity * predictionTime*/ :
+            transform.position + transform.forward * 50; // Si pas de cible, tirer droit devant
+
+        // Instancier la flèche et lui appliquer une force
+        GameObject arrow = Instantiate(ArrowPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
+        arrow.transform.up = targetPosition - transform.position; // Orienter la flèche vers la cible
+        arrow.GetComponent<Arrow>().Initialize(targetPosition, gameObject); // Initialiser la flèche avec la position de la cible et le lanceur
+    }
+
+    public void TakeDamage(int damage)
+    {
+        // Logique pour gérer les dégâts subis par le joueur
+        Debug.Log($"Player took {damage} damage!");
+        states["Hit"] = true;
+        animator.Play("Hit");
+        StartCoroutine(ResetAnimator());
+    }
+
     public void AddPoints(int points)
     {
         BonusPoints += points;
