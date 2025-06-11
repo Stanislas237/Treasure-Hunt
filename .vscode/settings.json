@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Treasure Hunt.sln"
+    "dotnet.defaultSolution": "Treasure-Hunt.sln"
 }
