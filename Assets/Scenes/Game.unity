@@ -284,13 +284,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.2164396, y: 0, z: 0, w: 0.97629607}
-  m_LocalPosition: {x: 4.1, y: 4.11, z: -16.35}
+  m_LocalRotation: {x: 0.3420201, y: 0, z: 0, w: 0.9396927}
+  m_LocalPosition: {x: 4.1, y: 4.6, z: -14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 25, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 40, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -674,7 +674,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CoinPrefab: {fileID: 8959531281939941489, guid: 15f15f0b08be0ec4e82788904aaab01c, type: 3}
-  coinSpawnInterval: 30
+  TreasurePrefab: {fileID: 1000014038691284, guid: efebddd0b5766bd499be8b63f581de68, type: 3}
+  SpawnInterval: 0
 --- !u!1 &1878041854
 GameObject:
   m_ObjectHideFlags: 0
@@ -1072,7 +1073,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &919132149025230816
 GameObject:
   m_ObjectHideFlags: 0
@@ -1155,7 +1156,7 @@ MonoBehaviour:
   speed: 4
   rotationSpeed: 5
   jumpForce: 0.5
-  weapon: 2
+  weapon: 0
   textPoints: {fileID: 1919174198}
   ArrowPrefab: {fileID: 2404481108363504149, guid: 27e1f8f54214d354e92e384600422deb, type: 3}
 --- !u!4 &1031632034944904967

@@ -225,6 +225,28 @@ public class Player : MonoBehaviour
         arrow.GetComponent<Arrow>().Initialize(targetPosition, gameObject); // Initialiser la flèche avec la position de la cible et le lanceur
     }
 
+    public void EquipWeapon(string newWeapon)
+    {
+        switch (newWeapon)
+        {
+            case "Bow":
+                weapon = Weapon.Bow;
+                transform.Find("Bow").gameObject.SetActive(true); // Activer le modèle de l'arc
+                transform.Find("Sword").gameObject.SetActive(false); // Désactiver le modèle de l'épée
+                break;
+            case "Sword":
+                weapon = Weapon.Sword;
+                transform.Find("Bow").gameObject.SetActive(false); // Désactiver le modèle de l'arc
+                transform.Find("Sword").gameObject.SetActive(true); // Activer le modèle de l'épée
+                break;
+            default:
+                weapon = Weapon.None;
+                transform.Find("Bow").gameObject.SetActive(false); // Désactiver le modèle de l'arc
+                transform.Find("Sword").gameObject.SetActive(false); // Désactiver le modèle de l'épée
+                break;
+        }
+    }
+
     public void LaunchArrow()
     {
         if (weapon != Weapon.Bow)
@@ -248,8 +270,11 @@ public class Player : MonoBehaviour
         if (weapon != Weapon.None)
             return;
 
-        if (FindTargetInView(50, 2).TryGetComponent(out Player player)) // Vérifier si la cible est un joueur
-            player.TakeDamage(5); // Infliger des dégâts au joueur
+        try
+        {
+            if (FindTargetInView(50, 2).TryGetComponent(out Player player)) // Vérifier si la cible est un joueur
+                player.TakeDamage(5); // Infliger des dégâts au joueur
+        } catch{}
     }
 
     public void TakeDamage(int damage)

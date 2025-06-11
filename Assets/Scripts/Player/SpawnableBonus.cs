@@ -10,8 +10,6 @@ public abstract class SpawnableBonus : MonoBehaviour
             Destroy(gameObject); // Destroy if no ground is found
     }
 
-    private void Update() => transform.Rotate(Vector3.up, 90 * Time.deltaTime); // Rotate the bonus item
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.TryGetComponent(out Player p))

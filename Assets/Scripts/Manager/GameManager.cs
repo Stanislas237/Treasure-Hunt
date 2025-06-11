@@ -5,11 +5,18 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject CoinPrefab;
     [SerializeField]
-    private float coinSpawnInterval = 2f; // Interval in seconds for spawning coins
+    private GameObject TreasurePrefab;
+    [SerializeField]
+    private float SpawnInterval;
 
-    private void Start() => InvokeRepeating(nameof(InstantiateCoin), 0f, coinSpawnInterval);
+    private void Start() => InvokeRepeating(nameof(InstantiateCoin), 3, SpawnInterval);
 
-    private void InstantiateCoin() => Instantiate(CoinPrefab, GenerateRandomPointInOval(), Quaternion.identity);
+    private void InstantiateCoin()
+    {
+        var prefab = Random.Range(0f, 1f) > 0.8f ? TreasurePrefab : CoinPrefab;
+        // Instantiate a coin or treasure at a random point in the oval area
+        Instantiate(prefab, GenerateRandomPointInOval(), prefab.transform.rotation);
+    }
     
     Vector3 GenerateRandomPointInOval(float radiusX = 9, float radiusY = 8.8f)
     {
