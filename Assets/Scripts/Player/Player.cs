@@ -221,7 +221,7 @@ public class Player : MonoBehaviour
 
         // Instancier la flèche et lui appliquer une force
         GameObject arrow = Instantiate(ArrowPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
-        arrow.transform.up = targetPosition - transform.position; // Orienter la flèche vers la cible
+        arrow.transform.right = targetPosition - transform.position; // Orienter la flèche vers la cible
         arrow.GetComponent<Arrow>().Initialize(targetPosition, gameObject); // Initialiser la flèche avec la position de la cible et le lanceur
     }
 
