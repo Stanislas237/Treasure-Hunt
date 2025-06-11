@@ -135,8 +135,6 @@ public class Player : MonoBehaviour
             animator.Play(attackAnimation);
             animator.speed = 1;
             states["Attack"] = true;
-            if (weapon == Weapon.Bow)
-                LaunchArrow(); // Lancer une flèche si le joueur utilise un arc
             StartCoroutine(ResetAnimator());
         };
     }
@@ -169,16 +167,9 @@ public class Player : MonoBehaviour
         if (controller.isGrounded && movementInput.y < 0)
             movementInput.y = -1;
         movementInput.y -= gravity * Time.deltaTime;
-        controller.Move(movementInput * speed * Time.deltaTime);
-    }
 
-    void LaunchArrow()
-    {
-        if (weapon != Weapon.Bow)
-            return;
-
-        FireArrow(FindTargetInView(), 0.5f); // Tirer une flèche courbée
-        Debug.Log("Arrow launched!");
+        float i = states["Walk"] ? 0.5f : 1f; // Adjust speed based on walking or running state
+        controller.Move(movementInput * speed * i * Time.deltaTime);
     }
 
     Transform FindTargetInView(float viewAngle = 50, float viewDistance = 10)
@@ -205,6 +196,22 @@ public class Player : MonoBehaviour
         return bestTarget; // Retourner la meilleure cible ou null
     }
 
+    List<Transform> FindTargetsInView(float viewAngle = 100, float viewDistance = 2)
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, viewDistance); // Détection dans un rayon
+        List<Transform> targets = new();
+        foreach (Collider col in colliders)
+        {
+            if (!col.CompareTag("Player") || col.transform == transform)
+                continue; // Ignorer les objets qui ne sont pas des joueurs ou soi-même
+
+            float angle = Vector3.Angle(transform.forward, (col.transform.position - transform.position).normalized);
+            if (angle < viewAngle * 0.5f)
+                targets.Add(col.transform); // Ajouter la cible si elle est dans le champ de vision
+        }
+        return targets;
+    }
+
     void FireArrow(Transform target, float predictionTime)
     {
         Debug.Log($"Firing arrow at target: {target?.name}");
@@ -216,6 +223,33 @@ public class Player : MonoBehaviour
         GameObject arrow = Instantiate(ArrowPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
         arrow.transform.up = targetPosition - transform.position; // Orienter la flèche vers la cible
         arrow.GetComponent<Arrow>().Initialize(targetPosition, gameObject); // Initialiser la flèche avec la position de la cible et le lanceur
+    }
+
+    public void LaunchArrow()
+    {
+        if (weapon != Weapon.Bow)
+            return;
+
+        FireArrow(FindTargetInView(), 0.5f); // Tirer une flèche courbée
+    }
+
+    public void SwordAttack()
+    {
+        if (weapon != Weapon.Sword)
+            return;
+
+        foreach (Transform target in FindTargetsInView())
+            if (target.TryGetComponent(out Player player)) // Vérifier si la cible est un joueur
+                player.TakeDamage(10); // Infliger des dégâts au joueur
+    }
+
+    public void Punch()
+    {
+        if (weapon != Weapon.None)
+            return;
+
+        if (FindTargetInView(50, 2).TryGetComponent(out Player player)) // Vérifier si la cible est un joueur
+            player.TakeDamage(5); // Infliger des dégâts au joueur
     }
 
     public void TakeDamage(int damage)
