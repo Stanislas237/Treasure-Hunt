@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float SpawnInterval;
 
+    public static string PlayerName { get; private set; } = "RandomPlayer";
+
     private void Start() => InvokeRepeating(nameof(InstantiateCoin), 3, SpawnInterval);
 
     private void InstantiateCoin()

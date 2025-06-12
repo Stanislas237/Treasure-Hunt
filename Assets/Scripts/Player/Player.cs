@@ -1,8 +1,8 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -41,12 +41,12 @@ public class Player : MonoBehaviour
     [SerializeField]
     private Weapon weapon = Weapon.None;
 
-    /// <summary>
-    /// Weapon currently equipped by the player.
-    /// </summary>
-    [SerializeField]
-    private TextMeshProUGUI textPoints;
     private int BonusPoints;
+
+    /// <summary>
+    /// UI component to display player points.
+    /// </summary>
+    PlayerUI playerUI;
 
     /// <summary>
     /// The arrow prefab to be instantiated when the player uses a bow.
@@ -82,10 +82,24 @@ public class Player : MonoBehaviour
     };
 
     private Dictionary<string, float> animLengths = new();
+
+    /// <summary>
+    /// The sword and bow game objects for the player.
+    /// </summary>
+    private GameObject Sword;
+
+    private GameObject Bow;
+
     void Start()
     {
+        Sword = transform.GetComponentsInChildren<Transform>().FirstOrDefault(child => child.name == "Sword")?.gameObject;
+        Bow = transform.GetComponentsInChildren<Transform>().FirstOrDefault(child => child.name == "Bow")?.gameObject;
+        Sword.SetActive(false); // Start with the sword hidden
+        Bow.SetActive(false); // Start with the bow hidden
+
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        playerUI = GetComponent<PlayerUI>();
 
         // Initialize input actions
         inputActions = new();
@@ -168,7 +182,7 @@ public class Player : MonoBehaviour
             movementInput.y = -1;
         movementInput.y -= gravity * Time.deltaTime;
 
-        float i = states["Walk"] ? 0.5f : 1f; // Adjust speed based on walking or running state
+        float i = states["Walk"] ? 0.25f : 1f; // Adjust speed based on walking or running state
         controller.Move(movementInput * speed * i * Time.deltaTime);
     }
 
@@ -231,20 +245,22 @@ public class Player : MonoBehaviour
         {
             case "Bow":
                 weapon = Weapon.Bow;
-                transform.Find("Bow").gameObject.SetActive(true); // Activer le modèle de l'arc
-                transform.Find("Sword").gameObject.SetActive(false); // Désactiver le modèle de l'épée
+                Bow.SetActive(true); // Activer le modèle de l'arc
+                Sword.SetActive(false); // Désactiver le modèle de l'épée
                 break;
             case "Sword":
                 weapon = Weapon.Sword;
-                transform.Find("Bow").gameObject.SetActive(false); // Désactiver le modèle de l'arc
-                transform.Find("Sword").gameObject.SetActive(true); // Activer le modèle de l'épée
+                Bow.SetActive(false); // Désactiver le modèle de l'arc
+                Sword.SetActive(true); // Activer le modèle de l'épée
                 break;
             default:
                 weapon = Weapon.None;
-                transform.Find("Bow").gameObject.SetActive(false); // Désactiver le modèle de l'arc
-                transform.Find("Sword").gameObject.SetActive(false); // Désactiver le modèle de l'épée
+                Bow.SetActive(false); // Désactiver le modèle de l'arc
+                Sword.SetActive(false); // Désactiver le modèle de l'épée
                 break;
         }
+
+        playerUI.UpdateWeaponIcon(newWeapon); // Mettre à jour l'icône de l'arme dans l'interface utilisateur
     }
 
     public void LaunchArrow()
@@ -289,7 +305,7 @@ public class Player : MonoBehaviour
     public void AddPoints(int points)
     {
         BonusPoints += points;
-        textPoints.text = $"Points : {BonusPoints}";
+        playerUI.UpdatePoints(BonusPoints); // Mettre à jour l'interface utilisateur avec les nouveaux points
     }
 }
 
