@@ -37,11 +37,11 @@ public class Arrow : MonoBehaviour
             return; // Ignore collision with the launcher
         if (other.gameObject.CompareTag("Terrain"))
             Destroy(gameObject); // Détruire la flèche lorsqu'elle touche le sol
-        else if (other.gameObject.TryGetComponent(out Player player))
+        else if (other.gameObject.TryGetComponent(out Entity e))
         {
-            int damages = Mathf.Min(5, player.BonusPoints);
-            player.TakeDamage(damages); // Infliger des dégâts au joueur
-            Launcher.GetComponent<Player>().AddPoints(damages); // Ajouter les points du joueur à soi-même
+            int damages = Mathf.Min(5, e.BonusPoints);
+            e.TakeDamage(damages); // Infliger des dégâts au joueur
+            Launcher.GetComponent<Entity>().AddPoints(damages); // Ajouter les points du joueur à soi-même
             Destroy(gameObject); // Détruire la flèche après avoir touché le joueur
         }
     }

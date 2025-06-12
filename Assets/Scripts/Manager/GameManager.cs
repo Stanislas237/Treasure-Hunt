@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float SpawnInterval;
 
+    public static List<Transform> SpawnedTreasures { get; private set; } = new List<Transform>();
+
     public static string PlayerName { get; private set; } = "RandomPlayer";
 
     private void Start() => InvokeRepeating(nameof(InstantiateCoin), 3, SpawnInterval);
@@ -17,7 +20,7 @@ public class GameManager : MonoBehaviour
     {
         var prefab = Random.Range(0f, 1f) > 0.8f ? TreasurePrefab : CoinPrefab;
         // Instantiate a coin or treasure at a random point in the oval area
-        Instantiate(prefab, GenerateRandomPointInOval(), prefab.transform.rotation);
+        SpawnedTreasures.Add(Instantiate(prefab, GenerateRandomPointInOval(), prefab.transform.rotation).transform);
     }
     
     Vector3 GenerateRandomPointInOval(float radiusX = 9, float radiusY = 8.8f)

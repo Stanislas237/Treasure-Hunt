@@ -12,12 +12,14 @@ public abstract class SpawnableBonus : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.TryGetComponent(out Player p))
+        if (other.gameObject.TryGetComponent(out Entity e))
         {
-            ApplyBonus(p);
+            ApplyBonus(e);
             Destroy(gameObject); // Destroy the bonus item after applying it
         }
     }
 
-    protected abstract void ApplyBonus(Player p);
+    void OnDisable() => GameManager.SpawnedTreasures.Remove(transform); // Remove from the list of spawned treasures when disabled
+
+    protected abstract void ApplyBonus(Entity e);
 }
