@@ -4,25 +4,38 @@ using System.Collections.Generic;
 
 public class Ennemy : Entity
 {
-    private string currentWeapon = "None";
     private float attackRange = 2f;
     private float decisionInterval = 0.5f;
+    private float lastJumpTime;
 
+    [SerializeField]
+    private float jumpCooldown;
     [SerializeField]
     private Transform player;
     private Transform closestTreasure;
     private bool isDodging;
+    private bool isJumping;
     public bool PlayerIsShootingBow = false; // Placeholder for player bow shooting detection
 
-    void Start() => InvokeRepeating(nameof(MakeDecision), 0f, decisionInterval);
+    protected override void Start()
+    {
+        base.Start();
+        InvokeRepeating(nameof(MakeDecision), 0f, decisionInterval);
+    }
 
     void OnDisable() => CancelInvoke(nameof(MakeDecision));
 
     void MakeDecision()
     {
         if (isDodging) return;
+        if (isJumping)
+            if (controller.isGrounded)
+                isJumping = false;
+            else
+                return;
 
         FindClosestTreasure();
+        CheckForJump();
 
         // Priorité 1: Si un trésor est proche, aller vers lui
         if (closestTreasure != null)
@@ -81,19 +94,38 @@ public class Ennemy : Entity
     IEnumerator Dodge()
     {
         isDodging = true;
-        Vector2 dodgeDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+        // Déplacement latéral ou reculer rapidement
+        Vector2 directionToPlayer = GetDirectionTo(player.position);
+        Vector2 dodgeDirection = new Vector2(-directionToPlayer.y, directionToPlayer.x) * (Random.value > 0.5f ? 1 : -1); // Gauche ou droite
 
-        float dodgeTime = 3f;
+        float dodgeTime = .5f;
         float timer = 0f;
 
         while (timer < dodgeTime)
         {
-            InitMove(dodgeDirection * 2f); // Dodge plus rapide
+            InitMove(dodgeDirection * 0.75f);
             timer += Time.deltaTime;
             yield return null;
         }
 
         isDodging = false;
         PlayerIsShootingBow = false; // Réinitialiser l'état de tir du joueur
+    }
+
+    void CheckForJump()
+    {
+        if (!controller.isGrounded || Time.time - lastJumpTime < jumpCooldown) return;
+        // Créer un rayon vers l'avant pour détecter un obstacle
+        Ray ray = new Ray(transform.position + Vector3.up * 0.35f, transform.forward);
+        Debug.DrawRay(ray.origin, ray.direction * 1f, Color.red);
+
+        // Si un obstacle est détecté dans un rayon de 1 unité
+        if (Physics.Raycast(ray, 1f))
+            if (Time.time - lastJumpTime > jumpCooldown) // Pour éviter de sauter en boucle
+            {
+                lastJumpTime = Time.time;
+                isJumping = true;
+                Jump();
+            }
     }
 }

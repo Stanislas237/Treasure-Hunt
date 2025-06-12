@@ -31,6 +31,7 @@ public abstract class Entity : MonoBehaviour
     /// <summary>
     /// Weapon currently equipped by the player.
     /// </summary>
+    [SerializeField]
     private Weapon weapon = Weapon.None;
     protected string CurrentWeapon => weapon.ToString(); // Retourne le nom de l'arme actuelle
     /// <summary>
@@ -94,14 +95,16 @@ public abstract class Entity : MonoBehaviour
         // Weapons held
         Sword = transform.GetComponentsInChildren<Transform>().FirstOrDefault(child => child.name == "Sword")?.gameObject;
         Bow = transform.GetComponentsInChildren<Transform>().FirstOrDefault(child => child.name == "Bow")?.gameObject;
-        Sword.SetActive(false); // Start with the sword hidden
-        Bow.SetActive(false); // Start with the bow hidden
+        Sword.SetActive(weapon == Weapon.Sword); // Start with the sword hidden or shown based on the weapon
+        Bow.SetActive(weapon == Weapon.Bow); // Start with the bow hidden or shown based on the weapon
 
         // Load the trap prefabs
         if (MudPrefab == null)
             MudPrefab = Resources.Load<GameObject>("Props/Traps/Mud/Mud");
         if (SpikePrefab == null)
             SpikePrefab = Resources.Load<GameObject>("Props/Traps/SpikeTrap/SpikeTrap");
+        if (ArrowPrefab == null)
+            ArrowPrefab = Resources.Load<GameObject>("Props/Arrow/Arrow");
 
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
@@ -179,13 +182,12 @@ public abstract class Entity : MonoBehaviour
 
     private void FireArrow(Transform target, float predictionTime)
     {
-        Vector3 targetPosition = target ?
-            targetPosition = target.position + Vector3.up * 0.5f : transform.position + transform.forward * 50; // Si pas de cible, tirer droit devant
+        Vector3 targetPosition = target ? target.position + Vector3.up * 0.5f : transform.position + transform.forward * 50; // Si pas de cible, tirer droit devant
 
         // Instancier la flèche et lui appliquer une force
         GameObject arrow = Instantiate(ArrowPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
         arrow.transform.right = targetPosition - transform.position; // Orienter la flèche vers la cible
-        arrow.GetComponent<Arrow>().Initialize(targetPosition, gameObject); // Initialiser la flèche avec la position de la cible et le lanceur
+        arrow.GetComponent<Arrow>().Initialize(targetPosition + arrow.transform.right * 20, gameObject); // Initialiser la flèche avec la position de la cible et le lanceur
     }
 
     public virtual void EquipWeapon(string newWeapon)
@@ -216,7 +218,7 @@ public abstract class Entity : MonoBehaviour
             return;
 
         var t = FindTargetInView();
-        if (t.TryGetComponent(out Ennemy e))
+        if (t != null && t.TryGetComponent(out Ennemy e))
             e.PlayerIsShootingBow = true; // Indiquer que le joueur tire une flèche
         FireArrow(t, 0.5f); // Tirer une flèche
     }

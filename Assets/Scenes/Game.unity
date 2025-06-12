@@ -3173,6 +3173,8 @@ MonoBehaviour:
   speed: 4
   rotationSpeed: 5
   jumpForce: 0.5
+  weapon: 2
+  jumpCooldown: 1
   player: {fileID: 543450652764411226}
   PlayerIsShootingBow: 0
 --- !u!1 &1674844547
@@ -4332,6 +4334,7 @@ MonoBehaviour:
   speed: 4
   rotationSpeed: 5
   jumpForce: 0.5
+  weapon: 1
 --- !u!114 &919132149025230820
 MonoBehaviour:
   m_ObjectHideFlags: 0
