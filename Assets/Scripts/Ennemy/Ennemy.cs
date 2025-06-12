@@ -33,9 +33,10 @@ public class Ennemy : Entity
                 isJumping = false;
             else
                 return;
+        if (CheckForJump())
+            return;
 
         FindClosestTreasure();
-        CheckForJump();
 
         // Priorité 1: Si un trésor est proche, aller vers lui
         if (closestTreasure != null)
@@ -61,7 +62,7 @@ public class Ennemy : Entity
         }
 
         // Priorité 4: Comportement selon l'arme
-        InitMove(GetDirectionTo(player.position));
+        InitMove(GetDirectionTo(player.position) * 0.75f);
         if (CurrentWeapon == "Bow")
         {
             Attack();
@@ -112,12 +113,11 @@ public class Ennemy : Entity
         PlayerIsShootingBow = false; // Réinitialiser l'état de tir du joueur
     }
 
-    void CheckForJump()
+    bool CheckForJump()
     {
-        if (!controller.isGrounded || Time.time - lastJumpTime < jumpCooldown) return;
+        if (!controller.isGrounded || Time.time - lastJumpTime < jumpCooldown) return false;
         // Créer un rayon vers l'avant pour détecter un obstacle
         Ray ray = new Ray(transform.position + Vector3.up * 0.35f, transform.forward);
-        Debug.DrawRay(ray.origin, ray.direction * 1f, Color.red);
 
         // Si un obstacle est détecté dans un rayon de 1 unité
         if (Physics.Raycast(ray, 1f))
@@ -126,6 +126,8 @@ public class Ennemy : Entity
                 lastJumpTime = Time.time;
                 isJumping = true;
                 Jump();
+                return true;
             }
+        return false;
     }
 }

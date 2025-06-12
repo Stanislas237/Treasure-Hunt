@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
@@ -9,6 +10,9 @@ public class GameManager : MonoBehaviour
     private GameObject TreasurePrefab;
     [SerializeField]
     private float SpawnInterval;
+    [SerializeField]
+    private TextMeshProUGUI timerText;
+    private float timeLeft = 180;
 
     public static List<Transform> SpawnedTreasures { get; private set; } = new List<Transform>();
 
@@ -16,13 +20,22 @@ public class GameManager : MonoBehaviour
 
     private void Start() => InvokeRepeating(nameof(InstantiateCoin), 3, SpawnInterval);
 
+    private void Update()
+    {
+        timeLeft -= Time.deltaTime;
+        if (timeLeft >= 0)
+            timerText.text = $"{(int)timeLeft / 60}.{(int)timeLeft % 60:D2}";
+        else
+            EndGame();
+    }
+
     private void InstantiateCoin()
     {
         var prefab = Random.Range(0f, 1f) > 0.8f ? TreasurePrefab : CoinPrefab;
         // Instantiate a coin or treasure at a random point in the oval area
         SpawnedTreasures.Add(Instantiate(prefab, GenerateRandomPointInOval(), prefab.transform.rotation).transform);
     }
-    
+
     Vector3 GenerateRandomPointInOval(float radiusX = 9, float radiusY = 8.8f)
     {
         float angle = Random.Range(0f, Mathf.PI * 2); // Angle aléatoire entre 0° et 360°
@@ -35,5 +48,10 @@ public class GameManager : MonoBehaviour
         float z = center.y + r * radiusY * Mathf.Sin(angle);
 
         return new Vector3(x, 0, z);
+    }
+
+    private void EndGame()
+    {
+        Debug.Log("Fin de la partie");
     }
 }
