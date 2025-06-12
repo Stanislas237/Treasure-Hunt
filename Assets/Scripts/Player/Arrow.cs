@@ -26,7 +26,6 @@ public class Arrow : MonoBehaviour
     {
         target = pos;
         Launcher = launcher;
-        Debug.Log($"Arrow initialized with target position: {target}");
         Destroy(gameObject, 5f); // Destroy the arrow after 5 seconds
     }
 
@@ -34,15 +33,16 @@ public class Arrow : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"Arrow collided with: {other.gameObject.name}");
         if (other.gameObject == Launcher)
             return; // Ignore collision with the launcher
-        if (other.gameObject.TryGetComponent(out Player player))
+        if (other.gameObject.CompareTag("Terrain"))
+            Destroy(gameObject); // Détruire la flèche lorsqu'elle touche le sol
+        else if (other.gameObject.TryGetComponent(out Player player))
         {
-            player.TakeDamage(10); // Deal damage to the player
-            Destroy(gameObject); // Destroy the arrow after hitting the player
+            int damages = Mathf.Min(5, player.BonusPoints);
+            player.TakeDamage(damages); // Infliger des dégâts au joueur
+            Launcher.GetComponent<Player>().AddPoints(damages); // Ajouter les points du joueur à soi-même
+            Destroy(gameObject); // Détruire la flèche après avoir touché le joueur
         }
-        else if (other.gameObject.CompareTag("Terrain"))
-            Destroy(gameObject); // Destroy the arrow when it hits the ground
     }
 }

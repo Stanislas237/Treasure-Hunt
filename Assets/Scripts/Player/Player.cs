@@ -41,7 +41,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private Weapon weapon = Weapon.None;
 
-    private int BonusPoints;
+    public int BonusPoints { get; private set; } = 0;
 
     /// <summary>
     /// UI component to display player points.
@@ -58,8 +58,8 @@ public class Player : MonoBehaviour
     /// The input for player movement.
     /// </summary>
     private Vector3 movementInput;
-    
-    private Vector3 previousPosition;    
+
+    private Vector3 previousPosition;
     /// <summary>
     /// The velocity of the player's movement.
     /// </summary>
@@ -79,6 +79,7 @@ public class Player : MonoBehaviour
         { "Walk", false },
         { "Hit", false },
         { "Attack", false },
+        { "Mud", false },
     };
 
     private Dictionary<string, float> animLengths = new();
@@ -107,7 +108,7 @@ public class Player : MonoBehaviour
 
         inputActions.Player.Move.performed += ctx =>
         {
-            if (states["Attack"] || states["Hit"])
+            if (states["Attack"] || states["Hit"] || states["Mud"])
                 return;
 
             var input = ctx.ReadValue<Vector2>();
@@ -120,6 +121,9 @@ public class Player : MonoBehaviour
         };
         inputActions.Player.Move.canceled += ctx =>
         {
+            if (states["Mud"])
+                return;
+
             movementInput = Vector3.zero;
             states["Walk"] = states["Run"] = false;
             animator.Play("Idle");
@@ -127,7 +131,7 @@ public class Player : MonoBehaviour
         };
         inputActions.Player.Jump.performed += ctx =>
         {
-            if (!controller.isGrounded || states["Attack"] || states["Hit"])
+            if (!controller.isGrounded || states["Attack"] || states["Hit"] || states["Mud"])
                 return;
 
             animator.Play("Jump");
@@ -137,7 +141,7 @@ public class Player : MonoBehaviour
         };
         inputActions.Player.Attack.performed += ctx =>
         {
-            if (!controller.isGrounded || states["Attack"] || states["Hit"])
+            if (!controller.isGrounded || states["Attack"] || states["Hit"] || states["Mud"])
                 return;
 
             string attackAnimation = weapon switch
@@ -182,7 +186,7 @@ public class Player : MonoBehaviour
             movementInput.y = -1;
         movementInput.y -= gravity * Time.deltaTime;
 
-        float i = states["Walk"] ? 0.25f : 1f; // Adjust speed based on walking or running state
+        float i = states["Walk"] || states["Mud"] ? 0.25f : 1f; // Adjust speed based on walking or running state
         controller.Move(movementInput * speed * i * Time.deltaTime);
     }
 
@@ -278,7 +282,11 @@ public class Player : MonoBehaviour
 
         foreach (Transform target in FindTargetsInView())
             if (target.TryGetComponent(out Player player)) // Vérifier si la cible est un joueur
-                player.TakeDamage(10); // Infliger des dégâts au joueur
+            {
+                int damages = Mathf.Min(5, player.BonusPoints);
+                player.TakeDamage(damages); // Infliger des dégâts au joueur
+                AddPoints(damages); // Ajouter les points du joueur à soi-même
+            }
     }
 
     public void Punch()
@@ -289,14 +297,14 @@ public class Player : MonoBehaviour
         try
         {
             if (FindTargetInView(50, 2).TryGetComponent(out Player player)) // Vérifier si la cible est un joueur
-                player.TakeDamage(5); // Infliger des dégâts au joueur
-        } catch{}
+                player.TakeDamage(0); // Infliger des dégâts au joueur
+        }
+        catch { }
     }
 
     public void TakeDamage(int damage)
     {
-        // Logique pour gérer les dégâts subis par le joueur
-        Debug.Log($"Player took {damage} damage!");
+        AddPoints(-damage); // Soustraire les points en fonction des dégâts subis
         states["Hit"] = true;
         animator.Play("Hit");
         StartCoroutine(ResetAnimator());
@@ -306,6 +314,28 @@ public class Player : MonoBehaviour
     {
         BonusPoints += points;
         playerUI.UpdatePoints(BonusPoints); // Mettre à jour l'interface utilisateur avec les nouveaux points
+    }
+
+    private IEnumerator OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Respawn"))
+        {
+            controller.enabled = false; // Désactiver le CharacterController pour éviter les problèmes de collision            
+            transform.position = new Vector3(3.7f, 5f, 0); // Réinitialiser la position du joueur
+            AddPoints(-2); // Pénalité de points pour la mort
+            controller.enabled = true; // Réactiver le CharacterController
+        }
+        else if (other.gameObject.CompareTag("Mud"))
+        {
+            foreach (var state in states.Keys.ToList())
+                states[state] = false; // Réinitialiser tous les états
+            states["Mud"] = true; // Activer l'état de boue
+            animator.speed = 1; // Réinitialiser la vitesse de l'animation
+            animator.Play("Idle");
+            yield return new WaitForSeconds(3f); // Attendre 3 secondes pour simuler l'effet de la boue
+            states["Mud"] = false; // Désactiver l'état de boue
+            movementInput = Vector3.zero; // Arrêter le mouvement du joueur
+        }
     }
 }
 
