@@ -9,6 +9,10 @@ public class PlayerUI : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI nameText;
     [SerializeField]
+    private TextMeshProUGUI MudText;
+    [SerializeField]
+    private TextMeshProUGUI SpikeText;
+    [SerializeField]
     private Image weaponIcon;
 
     /// <summary>
@@ -25,6 +29,11 @@ public class PlayerUI : MonoBehaviour
 
     public void UpdatePoints(int points) => textPoints.text = $"np : {points}";
     public void UpdateWeaponIcon(string weapon) => weaponIcon.sprite = weapon == "Sword" ? SwordIcon : BowIcon;
+    public void UpdateTrapCounts(int mud, int spike)
+    {
+        MudText.text = mud.ToString();
+        SpikeText.text = spike.ToString();
+    }
 
     void Start()
     {

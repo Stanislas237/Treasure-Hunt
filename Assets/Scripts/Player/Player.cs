@@ -80,9 +80,24 @@ public class Player : MonoBehaviour
         { "Hit", false },
         { "Attack", false },
         { "Mud", false },
+        { "Slow", false },
     };
 
-    private Dictionary<string, float> animLengths = new();
+    /// <summary>
+    /// Dictionary to manage player trap quantities.
+    /// </summary>
+    private Dictionary<string, int> trapQuantities = new()
+    {
+        { "Mud", 1 },
+        { "Spike", 1 },
+    };
+
+    /// <summary>
+    /// The mud and spike game objects for the player.
+    /// </summary>
+    private GameObject MudPrefab;
+
+    private GameObject SpikePrefab;
 
     /// <summary>
     /// The sword and bow game objects for the player.
@@ -97,6 +112,9 @@ public class Player : MonoBehaviour
         Bow = transform.GetComponentsInChildren<Transform>().FirstOrDefault(child => child.name == "Bow")?.gameObject;
         Sword.SetActive(false); // Start with the sword hidden
         Bow.SetActive(false); // Start with the bow hidden
+
+        MudPrefab = Resources.Load<GameObject>("Props/Traps/Mud/Mud");
+        SpikePrefab = Resources.Load<GameObject>("Props/Traps/SpikeTrap/SpikeTrap");
 
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
@@ -155,6 +173,11 @@ public class Player : MonoBehaviour
             states["Attack"] = true;
             StartCoroutine(ResetAnimator());
         };
+        inputActions.Player.Interact.performed += ctx =>
+        {
+            if (trapQuantities["Mud"] > 0) ThrowTrap("Mud");
+            else ThrowTrap("Spike");
+        };
     }
 
     void OnDisable() => inputActions.Player.Disable();
@@ -186,7 +209,8 @@ public class Player : MonoBehaviour
             movementInput.y = -1;
         movementInput.y -= gravity * Time.deltaTime;
 
-        float i = states["Walk"] || states["Mud"] ? 0.25f : 1f; // Adjust speed based on walking or running state
+        float i = states["Walk"] || states["Mud"] ? 0.4f : 1f; // Adjust speed based on walking or running state
+        if (states["Slow"]) i /= 2;
         controller.Move(movementInput * speed * i * Time.deltaTime);
     }
 
@@ -316,6 +340,27 @@ public class Player : MonoBehaviour
         playerUI.UpdatePoints(BonusPoints); // Mettre à jour l'interface utilisateur avec les nouveaux points
     }
 
+    public void ThrowTrap(string trapType)
+    {
+        if (trapQuantities.ContainsKey(trapType) && trapQuantities[trapType] > 0)
+        {
+            GameObject trapPrefab = trapType == "Mud" ? MudPrefab : SpikePrefab;
+            if (trapPrefab != null)
+            {
+                trapQuantities[trapType]--;
+                Instantiate(trapPrefab, transform.position - transform.forward + Vector3.up * 0.1f, Quaternion.identity);
+                playerUI.UpdateTrapCounts(trapQuantities["Mud"], trapQuantities["Spike"]); // Mettre à jour l'interface utilisateur avec les quantités de pièges
+            }
+        }
+    }
+
+    public void AddTrap(string trapType)
+    {
+        if (trapQuantities.ContainsKey(trapType))
+            trapQuantities[trapType]++;
+        playerUI.UpdateTrapCounts(trapQuantities["Mud"], trapQuantities["Spike"]); // Mettre à jour l'interface utilisateur avec les quantités de pièges
+    }
+
     private IEnumerator OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Respawn"))
@@ -335,6 +380,19 @@ public class Player : MonoBehaviour
             yield return new WaitForSeconds(3f); // Attendre 3 secondes pour simuler l'effet de la boue
             states["Mud"] = false; // Désactiver l'état de boue
             movementInput = Vector3.zero; // Arrêter le mouvement du joueur
+        }
+        else if (other.gameObject.CompareTag("Spike"))
+        {
+            states["Slow"] = true; // Activer l'état de ralentissement
+            yield return new WaitForSeconds(3f); // Attendre 3 secondes pour simuler l'effet de ralentissement
+            states["Slow"] = false; // Désactiver l'état de ralentissement
+        }
+
+        if (other.TryGetComponent(out Animator anim))
+        {
+            anim.Play("TrapFadeOut"); // Jouer l'animation de disparition du piège
+            yield return new WaitForSeconds(anim.GetCurrentAnimatorStateInfo(0).length); // Attendre la fin de l'animation
+            Destroy(other.gameObject); // Détruire l'objet bonus après application
         }
     }
 }
