@@ -21,9 +21,12 @@ public class Ennemy : Entity
     {
         base.Start();
         InvokeRepeating(nameof(MakeDecision), 0f, decisionInterval);
+        InvokeRepeating(nameof(ThrowTrap), 10f, 10f);
     }
 
     void OnDisable() => CancelInvoke(nameof(MakeDecision));
+
+    void ThrowTrap() => ThrowTrap(Random.Range(0, 2) == 0 ? "Mud" : "Spike");
 
     void MakeDecision()
     {
@@ -130,4 +133,6 @@ public class Ennemy : Entity
             }
         return false;
     }
+
+    public override string GetName() => "Computer";
 }

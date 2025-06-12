@@ -62,4 +62,6 @@ public class Player : Entity
         base.AddTrap(trapType);
         playerUI.UpdateTrapCounts(trapQuantities["Mud"], trapQuantities["Spike"]); // Mettre à jour les compteurs de pièges dans l'interface utilisateur
     }
+
+    public override string GetName() => GameManager.PlayerName;
 }

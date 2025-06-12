@@ -92,6 +92,8 @@ public abstract class Entity : MonoBehaviour
 
     protected virtual void Start()
     {
+        GameManager.Players.Add(this);
+
         // Weapons held
         Sword = transform.GetComponentsInChildren<Transform>().FirstOrDefault(child => child.name == "Sword")?.gameObject;
         Bow = transform.GetComponentsInChildren<Transform>().FirstOrDefault(child => child.name == "Bow")?.gameObject;
@@ -312,11 +314,12 @@ public abstract class Entity : MonoBehaviour
 
         IEnumerator TrapAnimation()
         {
-            if (other.TryGetComponent(out Animator anim))
+            if (other && other.TryGetComponent(out Animator anim))
             {
                 anim.Play("TrapFadeOut"); // Jouer l'animation de disparition du piège
                 yield return new WaitForSeconds(anim.GetCurrentAnimatorStateInfo(0).length); // Attendre la fin de l'animation
-                Destroy(other.gameObject); // Détruire l'objet bonus après application                
+                if (other)
+                    Destroy(other.gameObject); // Détruire l'objet bonus après application                
             }
         }
     }
@@ -371,6 +374,8 @@ public abstract class Entity : MonoBehaviour
         states["Attack"] = true;
         StartCoroutine(ResetAnimator());
     }
+
+    public abstract string GetName();
 }
 
 enum Weapon

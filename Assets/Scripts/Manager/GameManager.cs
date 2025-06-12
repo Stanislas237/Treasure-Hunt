@@ -1,5 +1,7 @@
 using UnityEngine;
 using TMPro;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
@@ -12,9 +14,12 @@ public class GameManager : MonoBehaviour
     private float SpawnInterval;
     [SerializeField]
     private TextMeshProUGUI timerText;
-    private float timeLeft = 180;
+    [SerializeField]
+    private Transform EndGamePanel;
+    private float timeLeft = 5;
 
-    public static List<Transform> SpawnedTreasures { get; private set; } = new List<Transform>();
+    public static List<Transform> SpawnedTreasures { get; private set; } = new();
+    public static List<Entity> Players { get; private set; } = new();
 
     public static string PlayerName { get; private set; } = "RandomPlayer";
 
@@ -22,11 +27,14 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        timeLeft -= Time.deltaTime;
         if (timeLeft >= 0)
-            timerText.text = $"{(int)timeLeft / 60}.{(int)timeLeft % 60:D2}";
-        else
-            EndGame();
+        {            
+            timeLeft -= Time.deltaTime;
+            if (timeLeft >= 0)
+                timerText.text = $"{(int)timeLeft / 60}.{(int)timeLeft % 60:D2}";
+            else
+                StartCoroutine(EndGame());
+        }
     }
 
     private void InstantiateCoin()
@@ -50,8 +58,49 @@ public class GameManager : MonoBehaviour
         return new Vector3(x, 0, z);
     }
 
-    private void EndGame()
+    IEnumerator AnimateTextSizeCoroutine(TextMeshProUGUI textElement, string text, float targetSize, float duration)
     {
-        Debug.Log("Fin de la partie");
+        float startSize = 300;
+        float time = 0f;
+        textElement.text = text;
+
+        while (time < duration)
+        {
+            textElement.fontSize = Mathf.Lerp(startSize, targetSize, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        textElement.fontSize = targetSize;
+    }
+
+    private IEnumerator EndGame()
+    {
+        var orderedList = Players.OrderByDescending(e => e.BonusPoints).ToList();
+        bool hasWon = orderedList[0].TryGetComponent(out Player p) && p.enabled;
+
+        foreach (var item in Players)
+            item.enabled = false;
+
+        EndGamePanel.gameObject.SetActive(true);
+        yield return new WaitForSeconds(EndGamePanel.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
+
+        StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>(), "The End", 100, 0.3f));
+        yield return new WaitForSeconds(0.5f);
+
+        StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(0).GetChild(1).GetComponent<TextMeshProUGUI>(), "Ranking", 50, 0.3f));
+        yield return new WaitForSeconds(0.5f);
+
+        for (int i = 0; i < orderedList.Count; i++)
+        {
+            if (i > 3) break;
+
+            StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(1).GetChild(i).GetChild(0).GetComponent<TextMeshProUGUI>(), orderedList[i].GetName(), 36, 0.3f));
+            StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(1).GetChild(i).GetChild(1).GetComponent<TextMeshProUGUI>(), orderedList[i].BonusPoints.ToString(), 60, 0.3f));
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        var LastTextElement = EndGamePanel.GetChild(2).GetComponent<TextMeshProUGUI>();
+        StartCoroutine(AnimateTextSizeCoroutine(LastTextElement, hasWon ? "You Won" : "You Lost", 150, 0.3f));
+        LastTextElement.color = hasWon ? Color.green : Color.red;
     }
 }
