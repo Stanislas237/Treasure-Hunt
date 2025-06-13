@@ -7,21 +7,26 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour
 {
     [SerializeField]
-    private GameObject CoinPrefab;
-    [SerializeField]
-    private GameObject TreasurePrefab;
-    [SerializeField]
     private float SpawnInterval;
     [SerializeField]
     private TextMeshProUGUI timerText;
     [SerializeField]
     private Transform EndGamePanel;
-    private float timeLeft = 5;
+    private float timeLeft = 180;
 
+    public static GameObject CoinPrefab;
+    public static GameObject TreasurePrefab;
     public static List<Transform> SpawnedTreasures { get; private set; } = new();
     public static List<Entity> Players { get; private set; } = new();
 
     public static string PlayerName { get; private set; } = "RandomPlayer";
+
+    protected virtual void Awake()
+    {
+        if (GetType() != GameMaster.GameType)
+            Destroy(this);
+        GameMaster.Instance.LaunchGame();
+    }
 
     private void Start() => InvokeRepeating(nameof(InstantiateCoin), 3, SpawnInterval);
 
@@ -75,6 +80,9 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator EndGame()
     {
+        CancelInvoke();
+        EndGamePanel.parent.GetChild(0).gameObject.SetActive(false);
+
         var orderedList = Players.OrderByDescending(e => e.BonusPoints).ToList();
         bool hasWon = orderedList[0].TryGetComponent(out Player p) && p.enabled;
 

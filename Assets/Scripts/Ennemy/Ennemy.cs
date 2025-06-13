@@ -4,17 +4,17 @@ using System.Collections.Generic;
 
 public class Ennemy : Entity
 {
-    private float attackRange = 2f;
-    private float decisionInterval = 0.5f;
+    private readonly float attackRange = 2f;
+    private readonly float decisionInterval = 0.5f;
     private float lastJumpTime;
 
-    [SerializeField]
-    private float jumpCooldown;
+    private readonly float jumpCooldown = 1;
     [SerializeField]
     private Transform player;
     private Transform closestTreasure;
     private bool isDodging;
     private bool isJumping;
+    [HideInInspector]
     public bool PlayerIsShootingBow = false; // Placeholder for player bow shooting detection
 
     protected override void Start()
@@ -65,11 +65,16 @@ public class Ennemy : Entity
         }
 
         // Priorité 4: Comportement selon l'arme
-        InitMove(GetDirectionTo(player.position) * 0.75f);
-        if (CurrentWeapon == "Bow")
+        switch (CurrentWeapon)
         {
-            Attack();
-            return;
+            case "None": default: return;
+            case "Sword":
+                InitMove(GetDirectionTo(player.position) * 0.75f);
+                return;
+            case "Bow":
+                InitMove(GetDirectionTo(player.position) * 0.75f);
+                Attack();
+                return;
         }
     }
 

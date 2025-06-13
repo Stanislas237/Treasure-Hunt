@@ -8,18 +8,15 @@ public abstract class Entity : MonoBehaviour
     /// <summary>
     /// Player's speed settings.
     /// </summary>
-    [SerializeField]
-    protected float speed = .5f;
+    protected float speed = 4f;
     /// <summary>
     /// Player's rotation speed settings.
     /// </summary>
-    [SerializeField]
     protected float rotationSpeed = 5f;
     /// <summary>
     /// Player jump settings.
     /// </summary>
-    [SerializeField]
-    protected float jumpForce = 5f;
+    protected float jumpForce = .5f;
     /// <summary>
     /// Player's gravity settings.
     /// </summary>
@@ -31,13 +28,12 @@ public abstract class Entity : MonoBehaviour
     /// <summary>
     /// Weapon currently equipped by the player.
     /// </summary>
-    [SerializeField]
     private Weapon weapon = Weapon.None;
     protected string CurrentWeapon => weapon.ToString(); // Retourne le nom de l'arme actuelle
     /// <summary>
     /// The arrow prefab to be instantiated when the player uses a bow.
     /// </summary>
-    private static GameObject ArrowPrefab;
+    public static GameObject ArrowPrefab;
     /// <summary>
     /// Player's points.
     /// </summary>
@@ -79,9 +75,9 @@ public abstract class Entity : MonoBehaviour
     /// <summary>
     /// The mud and spike game objects for the player.
     /// </summary>
-    protected static GameObject MudPrefab;
+    public static GameObject MudPrefab;
 
-    protected static GameObject SpikePrefab;
+    public static GameObject SpikePrefab;
 
     /// <summary>
     /// The sword and bow game objects for the player.

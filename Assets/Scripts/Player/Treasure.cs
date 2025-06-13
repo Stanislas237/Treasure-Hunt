@@ -7,9 +7,9 @@ public class Treasure : SpawnableBonus
         e.AddPoints(40); // Add points to the entity
 
         var r = Random.Range(0f, 1f);
-        if (r < 0.6f)
+        if (r < 0.1f)
             return;
-        else if (r < 0.7f)
+        else if (r < 0.45f)
             e.EquipWeapon("Sword"); // Equip a sword
         else if (r < 0.8f)
             e.EquipWeapon("Bow"); // Equip a bow

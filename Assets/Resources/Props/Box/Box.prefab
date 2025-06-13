@@ -16119,7 +16119,7 @@ GameObject:
   - component: {fileID: 6084963233142314061}
   - component: {fileID: -6924210152976825354}
   m_Layer: 0
-  m_Name: MysteryBox
+  m_Name: Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
