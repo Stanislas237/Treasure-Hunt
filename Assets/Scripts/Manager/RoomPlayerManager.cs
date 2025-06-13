@@ -1,113 +1,122 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using Mirror;
 using TMPro;
 
 public class RoomPlayerManager : NetworkBehaviour
 {
     private readonly SyncDictionary<uint, string> playerNames = new();
+    private readonly Dictionary<uint, GameObject> uiPlayers = new();
 
     private static RoomPlayerManager Instance;
 
+    private NetworkRoomManager Singleton => (NetworkRoomManager)NetworkRoomManager.singleton;
+
     [SerializeField]
-    private Transform PlayerList;
+    private Transform playerListContainer;
+    [SerializeField]
+    private TextMeshProUGUI countText;
 
     private void Awake() => Instance = this;
 
     void OnDisable()
     {
+        NetworkingManager.playerNames = new();
         foreach (KeyValuePair<uint, string> pair in playerNames)
             NetworkingManager.playerNames.Add(pair.Key, pair.Value);
     }
 
-    private static void UpdateUI()
+    void Update()
     {
-        for (int i = Instance.PlayerList.childCount - 1; i > 0; i--)
-            Destroy(Instance.PlayerList.GetChild(i).gameObject);
+        if (NetworkRoomManager.singleton == null) return;        
+        countText.text = $"{playerNames.Count}/4";
 
-        foreach (var k in Instance.playerNames.Keys)
+        // Supprime les UI des joueurs qui ne sont plus là
+        foreach (var id in new List<uint>(uiPlayers.Keys))
         {
-            var obj = Instantiate(Instance.PlayerList.GetChild(0).gameObject, Instance.PlayerList);
-            obj.SetActive(true);
-            obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = Instance.playerNames[k];
-
-            var button = obj.transform.GetChild(1);
-            var buttonImage = button.GetComponent<Image>();
-            var buttonText = button.GetChild(0).GetComponent<TextMeshProUGUI>();
-            if (k == NetworkClient.localPlayer.netId)
+            if (!Singleton.roomSlots.Any(p => p.netId == id))
             {
-                buttonImage.color = Color.green;
-                buttonText.text = "Ready";
-                button.GetComponent<Button>().onClick.AddListener(() =>
+                Destroy(uiPlayers[id]);
+                uiPlayers.Remove(id);
+                RemovePlayer(id);
+            }
+        }
+
+        // Ajoute ou met à jour les UI des joueurs
+        foreach (var player in Singleton.roomSlots)
+        {
+            if (!uiPlayers.ContainsKey(player.netId))
+            {
+                var obj = Instantiate(playerListContainer.GetChild(0).gameObject, playerListContainer);
+                obj.SetActive(true);
+                obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = playerNames[player.netId];
+                uiPlayers[player.netId] = obj;
+
+                if (player.isLocalPlayer)
                 {
-                    Instance.ChangeReadyState(k);
-                    if (buttonText.text == "Ready")
+                    DisplayPlayerData("(not ready)", "Ready", Color.green, obj.transform, () =>
                     {
-                        buttonText.text = "Cancel";
-                        buttonImage.color = Color.yellow;
-                    }
-                    else
-                    {
-                        buttonText.text = "Ready";
-                        buttonImage.color = Color.green;
-                    }
-                });
+                        if (player.readyToBegin)
+                            DisplayPlayerData("(not ready)", "Ready", Color.green, obj.transform, null);
+                        else
+                            DisplayPlayerData("(ready)", "Cancel", Color.yellow, obj.transform, null);
+                        player.CmdChangeReadyState(!player.readyToBegin);
+                    });
+                }
+                else if (NetworkServer.active)
+                    DisplayPlayerData("", "Disconnect", Color.red, obj.transform, () => player.connectionToClient.Disconnect());
+                else
+                    DisplayPlayerData("", "", Color.clear, obj.transform, null);
             }
-            else if (Instance.isServer)
+
+            try
             {
-                buttonImage.color = Color.red;
-                buttonText.text = "Remove";
-                button.GetComponent<Button>().onClick.AddListener(() => Instance.DisconnectPlayer(k));
-            }
-            else
-                Destroy(button.gameObject);
+                if (player.readyToBegin)
+                    if (player.isLocalPlayer)
+                        DisplayPlayerData("(ready)", "Cancel", Color.yellow, uiPlayers[player.netId].transform, null);
+                    else
+                        DisplayPlayerData("(ready)", null, null, uiPlayers[player.netId].transform, null);
+                else if (player.isLocalPlayer)
+                    DisplayPlayerData("(not ready)", "Ready", Color.green, uiPlayers[player.netId].transform, null);
+                else
+                    DisplayPlayerData("(not ready)", null, null, uiPlayers[player.netId].transform, null);
+            } catch { }
         }
     }
 
-    public RoomPlayer FindRoomPlayer(uint netID)
+    void DisplayPlayerData(string readyText, string buttonText, Color? buttonColor, Transform element, UnityAction action)
     {
-        foreach (var player in FindObjectsByType<RoomPlayer>(FindObjectsSortMode.None))
+        if (!string.IsNullOrEmpty(readyText))
+            element.GetChild(1).GetComponent<TextMeshProUGUI>().text = readyText;
+
+        if (!string.IsNullOrEmpty(buttonText))
+            element.GetChild(2).GetChild(0).GetComponent<TextMeshProUGUI>().text = buttonText;
+
+        if (buttonColor != null)
+            element.GetChild(2).GetComponent<Image>().color = buttonColor.Value;
+
+        if (action != null)
         {
-            if (player.netId == netID)
-                return player; // Retourne le bon joueur
+            var b = element.GetChild(2).GetComponent<Button>().onClick;
+            b.RemoveAllListeners();
+            b.AddListener(action);
         }
-        return null; // Si aucun joueur avec ce netID n'est trouvé
-    }
-    
-    void ChangeReadyState(uint netID)
-    {
-        var player = FindRoomPlayer(netID);
-        if (player != null)
-            player.CmdChangeReadyState(!player.readyToBegin);
-    }
-
-    void DisconnectPlayer(uint netID)
-    {
-        var player = FindRoomPlayer(netID);
-        if (player != null)
-            player.CmdRemoveSelf();
     }
 
     public static void AddPlayer(uint netID, string name)
     {
         if (Instance.isServer)
-        {
             Instance.playerNames[netID] = name;
-            UpdateUI();
-        }
     }
 
     public static void RemovePlayer(uint netID)
     {
         if (Instance.isServer) 
-        {
             if (Instance.playerNames.ContainsKey(netID))
-            {
                 Instance.playerNames.Remove(netID);
-                UpdateUI();
-            }
-        }
     }
 
     public static string GetPlayer(uint netID) => Instance.playerNames[netID];
