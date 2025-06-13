@@ -67,7 +67,9 @@ public class Ennemy : Entity
         // Priorité 4: Comportement selon l'arme
         switch (CurrentWeapon)
         {
-            case "None": default: return;
+            case "None": default:
+                StopMove();
+                return;
             case "Sword":
                 InitMove(GetDirectionTo(player.position) * 0.75f);
                 return;

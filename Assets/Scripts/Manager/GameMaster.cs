@@ -7,7 +7,7 @@ public class GameMaster : MonoBehaviour
 {
     public static GameMaster Instance;
 
-    public static Type GameType = typeof(GameManager);
+    public static Type GameType = typeof(NetworkingManager);
 
     private List<GameObject> PrefabsToModify;
 
@@ -23,7 +23,7 @@ public class GameMaster : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Start()
+    private void Init()
     {
         // Load all prefabs
         PrefabsToModify = new()
@@ -45,6 +45,7 @@ public class GameMaster : MonoBehaviour
 
     public void LaunchGame()
     {
+        Init();
         if (GameType == typeof(GameManager))
             SetSoloMode();
         else

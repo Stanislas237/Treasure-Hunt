@@ -21,11 +21,18 @@ public class GameManager : MonoBehaviour
 
     public static string PlayerName { get; private set; } = "RandomPlayer";
 
-    protected virtual void Awake()
+    protected virtual bool Awake()
     {
         if (GetType() != GameMaster.GameType)
+        {
             Destroy(this);
-        GameMaster.Instance.LaunchGame();
+            return false;
+        }
+
+        try { GameMaster.Instance.LaunchGame(); }
+        catch { FindFirstObjectByType<GameMaster>().LaunchGame(); }
+
+        return true;
     }
 
     private void Start() => InvokeRepeating(nameof(InstantiateCoin), 3, SpawnInterval);

@@ -304,6 +304,7 @@ GameObject:
   - component: {fileID: 8965206221888412023}
   - component: {fileID: 3029459218784087104}
   - component: {fileID: 9157181290297402665}
+  - component: {fileID: 6721225688902203086}
   m_Layer: 0
   m_Name: Mousey
   m_TagString: Player
@@ -409,10 +410,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72c0bdc13e9b40e418886030a651b497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 4
-  rotationSpeed: 5
-  jumpForce: 0.5
-  weapon: 0
 --- !u!114 &9157181290297402665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -431,6 +428,23 @@ MonoBehaviour:
   SpikeText: {fileID: 0}
   weaponIcon: {fileID: 0}
   player: {fileID: 5917252856477233438}
+--- !u!114 &6721225688902203086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 681843342317652952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 4125343774
+  serverOnly: 0
+  visibility: 2
+  hasSpawned: 0
 --- !u!1 &1211233112864268726
 GameObject:
   m_ObjectHideFlags: 0
