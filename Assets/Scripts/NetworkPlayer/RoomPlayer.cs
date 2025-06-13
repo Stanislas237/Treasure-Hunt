@@ -19,6 +19,9 @@ public class RoomPlayer : NetworkRoomPlayer
     {
         CmdRemovePlayer(netId);
         base.OnStopLocalPlayer();
+
+        if (Tools.CurrentScene == "Waiting")
+            Tools.LoadScene("Menu");
     }
 
     [Command]

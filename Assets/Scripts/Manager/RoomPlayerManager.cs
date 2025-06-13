@@ -21,6 +21,7 @@ public class RoomPlayerManager : NetworkBehaviour
     private TextMeshProUGUI countText;
 
     private void Awake() => Instance = this;
+    private void Start() => InvokeRepeating(nameof(UpdateUI), 1, 1);
 
     void OnDisable()
     {
@@ -29,9 +30,9 @@ public class RoomPlayerManager : NetworkBehaviour
             NetworkingManager.playerNames.Add(pair.Key, pair.Value);
     }
 
-    void Update()
+    void UpdateUI()
     {
-        if (NetworkRoomManager.singleton == null) return;        
+        if (NetworkRoomManager.singleton == null) return;
         countText.text = $"{playerNames.Count}/4";
 
         // Supprime les UI des joueurs qui ne sont plus là
@@ -50,6 +51,7 @@ public class RoomPlayerManager : NetworkBehaviour
         {
             if (!uiPlayers.ContainsKey(player.netId))
             {
+                Debug.Log("Dans uiPlayers : netId = " + player.netId + ". Nbre total : " + Singleton.roomSlots.Count);
                 var obj = Instantiate(playerListContainer.GetChild(0).gameObject, playerListContainer);
                 obj.SetActive(true);
                 obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = playerNames[player.netId];
@@ -83,7 +85,8 @@ public class RoomPlayerManager : NetworkBehaviour
                     DisplayPlayerData("(not ready)", "Ready", Color.green, uiPlayers[player.netId].transform, null);
                 else
                     DisplayPlayerData("(not ready)", null, null, uiPlayers[player.netId].transform, null);
-            } catch { }
+            }
+            catch { }
         }
     }
 
@@ -114,10 +117,12 @@ public class RoomPlayerManager : NetworkBehaviour
 
     public static void RemovePlayer(uint netID)
     {
-        if (Instance.isServer) 
+        if (Instance.isServer)
             if (Instance.playerNames.ContainsKey(netID))
                 Instance.playerNames.Remove(netID);
     }
 
     public static string GetPlayer(uint netID) => Instance.playerNames[netID];
+
+    public void ToMenu() => Tools.LoadScene("Menu");
 }
