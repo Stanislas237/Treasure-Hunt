@@ -23,13 +23,6 @@ public class RoomPlayerManager : NetworkBehaviour
     private void Awake() => Instance = this;
     private void Start() => InvokeRepeating(nameof(UpdateUI), 1, 1);
 
-    void OnDisable()
-    {
-        NetworkingManager.playerNames = new();
-        foreach (KeyValuePair<uint, string> pair in playerNames)
-            NetworkingManager.playerNames.Add(pair.Key, pair.Value);
-    }
-
     void UpdateUI()
     {
         if (NetworkRoomManager.singleton == null) return;

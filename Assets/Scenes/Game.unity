@@ -7522,12 +7522,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49abcb1586fadad4ba09599e58a7eeeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textPoints: {fileID: 1919174198}
-  nameText: {fileID: 106469618}
-  MudText: {fileID: 918019829}
-  SpikeText: {fileID: 381554654}
-  weaponIcon: {fileID: 1967000968}
-  player: {fileID: 1114600486548375860}
+  rectTransform: {fileID: 273040670}
 --- !u!1 &2527033863851424464
 GameObject:
   m_ObjectHideFlags: 0

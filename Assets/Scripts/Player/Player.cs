@@ -16,11 +16,11 @@ public class Player : Entity
 
     protected override void Start()
     {
-        // Parent's Start method
-        base.Start();
-
         // Getting Player UI
         playerUI = GetComponent<PlayerUI>();
+
+        // Parent's Start method
+        base.Start();
 
         // Initialize input actions
         inputActions = new();
@@ -49,6 +49,9 @@ public class Player : Entity
     {
         base.AddPoints(points);
         playerUI.UpdatePoints(BonusPoints); // Mettre à jour l'interface utilisateur avec les nouveaux points
+
+        if (nPlayer != null)
+            nPlayer.CmdSetPoints(BonusPoints);
     }
 
     public override void ThrowTrap(string trapType)
@@ -63,5 +66,11 @@ public class Player : Entity
         playerUI.UpdateTrapCounts(trapQuantities["Mud"], trapQuantities["Spike"]); // Mettre à jour les compteurs de pièges dans l'interface utilisateur
     }
 
-    public override string GetName() => GameManager.PlayerName;
+    public override string GetName()
+    {
+        if (nPlayer == null)
+            return GameManager.PlayerName;
+        else
+            return nPlayer.playerName;
+    }
 }

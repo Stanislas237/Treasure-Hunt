@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
     public static List<Transform> SpawnedTreasures { get; private set; } = new();
     public static List<Entity> Players { get; private set; } = new();
 
-    public static string PlayerName { get; private set; } = "RandomPlayer";
+    public static string PlayerName { get; private set; } = "StanKamga";
 
     protected virtual bool Awake()
     {
@@ -49,14 +49,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void InstantiateCoin()
+    protected virtual void InstantiateCoin()
     {
-        var prefab = Random.Range(0f, 1f) > 0.8f ? TreasurePrefab : CoinPrefab;
+        var prefab = Random.Range(0, 10) > 7 ? TreasurePrefab : CoinPrefab;
         // Instantiate a coin or treasure at a random point in the oval area
         SpawnedTreasures.Add(Instantiate(prefab, GenerateRandomPointInOval(), prefab.transform.rotation).transform);
     }
 
-    Vector3 GenerateRandomPointInOval(float radiusX = 9, float radiusY = 8.8f)
+    protected Vector3 GenerateRandomPointInOval(float radiusX = 9, float radiusY = 8.8f)
     {
         float angle = Random.Range(0f, Mathf.PI * 2); // Angle aléatoire entre 0° et 360°
         float r = Mathf.Sqrt(Random.Range(0f, 1f));   // Distance aléatoire (distribution uniforme)

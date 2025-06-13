@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirror;
 
 public abstract class SpawnableBonus : MonoBehaviour
 {
@@ -15,11 +16,18 @@ public abstract class SpawnableBonus : MonoBehaviour
         if (other.gameObject.TryGetComponent(out Entity e))
         {
             ApplyBonus(e);
-            Destroy(gameObject); // Destroy the bonus item after applying it
+            if (NetworkServer.active)
+                NetworkServer.Destroy(gameObject);
+            else
+                Destroy(gameObject); // Destroy the bonus item after applying it
         }
     }
 
-    void OnDisable() => GameManager.SpawnedTreasures.Remove(transform); // Remove from the list of spawned treasures when disabled
+    void OnDisable()
+    {
+        if (GameManager.SpawnedTreasures.Contains(transform))
+            GameManager.SpawnedTreasures.Remove(transform); // Remove from the list of spawned treasures when disabled
+    }
 
     protected abstract void ApplyBonus(Entity e);
 }

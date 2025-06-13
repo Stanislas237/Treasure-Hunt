@@ -85,6 +85,9 @@ public abstract class Entity : MonoBehaviour
     private GameObject Sword;
     private GameObject Bow;
 
+    [HideInInspector]
+    public NPlayer nPlayer;
+
 
     protected virtual void Start()
     {
@@ -96,9 +99,16 @@ public abstract class Entity : MonoBehaviour
         Sword.SetActive(weapon == Weapon.Sword); // Start with the sword hidden or shown based on the weapon
         Bow.SetActive(weapon == Weapon.Bow); // Start with the bow hidden or shown based on the weapon
 
+        if (TryGetComponent(out nPlayer))
+            if (!nPlayer.isLocalPlayer)
+            {
+                enabled = false;
+                return;
+            }
+
         // Load the trap prefabs
         if (MudPrefab == null)
-            MudPrefab = Resources.Load<GameObject>("Props/Traps/Mud/Mud");
+                MudPrefab = Resources.Load<GameObject>("Props/Traps/Mud/Mud");
         if (SpikePrefab == null)
             SpikePrefab = Resources.Load<GameObject>("Props/Traps/SpikeTrap/SpikeTrap");
         if (ArrowPrefab == null)
@@ -106,6 +116,13 @@ public abstract class Entity : MonoBehaviour
 
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+    }
+
+    private void PlayAnimation(string name)
+    {
+        animator.Play(name);
+        if (nPlayer != null)
+            nPlayer.CmdSetAnim(name);
     }
 
     protected IEnumerator ResetAnimator()
@@ -117,11 +134,11 @@ public abstract class Entity : MonoBehaviour
         states["Attack"] = false;
         states["Hit"] = false;
         if (states["Run"])
-            animator.Play("Run");
+            PlayAnimation("Run");
         else if (states["Walk"])
-            animator.Play("Walk");
+            PlayAnimation("Walk");
         else
-            animator.Play("Idle");
+            PlayAnimation("Idle");
     }
 
     private void Update()
@@ -137,7 +154,9 @@ public abstract class Entity : MonoBehaviour
 
         float i = states["Walk"] || states["Mud"] ? 0.4f : 1f; // Adjust speed based on walking or running state
         if (states["Slow"]) i /= 2;
-        controller.Move(movementInput * speed * i * Time.deltaTime);
+
+        if (controller.enabled)
+            controller.Move(movementInput * speed * i * Time.deltaTime);
     }
 
     private Transform FindTargetInView(float viewAngle = 50, float viewDistance = 10)
@@ -185,7 +204,7 @@ public abstract class Entity : MonoBehaviour
         // Instancier la flèche et lui appliquer une force
         GameObject arrow = Instantiate(ArrowPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
         arrow.transform.right = targetPosition - transform.position; // Orienter la flèche vers la cible
-        arrow.GetComponent<Arrow>().Initialize(targetPosition + arrow.transform.right * 20, gameObject); // Initialiser la flèche avec la position de la cible et le lanceur
+        arrow.GetComponent<Arrow>().Initialize(targetPosition + arrow.transform.right * 20, this); // Initialiser la flèche avec la position de la cible et le lanceur
     }
 
     public virtual void EquipWeapon(string newWeapon)
@@ -252,7 +271,7 @@ public abstract class Entity : MonoBehaviour
     {
         AddPoints(-damage); // Soustraire les points en fonction des dégâts subis
         states["Hit"] = true;
-        animator.Play("Hit");
+        PlayAnimation("Hit");
         StartCoroutine(ResetAnimator());
     }
 
@@ -292,7 +311,7 @@ public abstract class Entity : MonoBehaviour
                 states[state] = false; // Réinitialiser tous les états
             states["Mud"] = true; // Activer l'état de boue
             animator.speed = 1; // Réinitialiser la vitesse de l'animation
-            animator.Play("Idle");
+            PlayAnimation("Idle");
             yield return new WaitForSeconds(3f); // Attendre 3 secondes pour simuler l'effet de la boue
             states["Mud"] = false; // Désactiver l'état de boue
             movementInput = Vector3.zero; // Arrêter le mouvement du joueur
@@ -328,7 +347,7 @@ public abstract class Entity : MonoBehaviour
         movementInput = new(input.x, 0, input.y);
         string state = weapon == Weapon.Bow ? "Walk" : "Run";
         states[state] = true;
-        animator.Play(state);
+        PlayAnimation(state);
         animator.speed = 1;
     }
 
@@ -339,7 +358,7 @@ public abstract class Entity : MonoBehaviour
 
         movementInput = Vector3.zero;
         states["Walk"] = states["Run"] = false;
-        animator.Play("Idle");
+        PlayAnimation("Idle");
         animator.speed = 1;
     }
 
@@ -348,7 +367,7 @@ public abstract class Entity : MonoBehaviour
         if (!controller.isGrounded || states["Attack"] || states["Hit"] || states["Mud"])
             return;
 
-        animator.Play("Jump");
+        PlayAnimation("Jump");
         animator.speed = 2f / jumpForce;
         movementInput.y = Mathf.Sqrt(jumpForce * 2f * gravity);
         StartCoroutine(ResetAnimator());
@@ -365,7 +384,7 @@ public abstract class Entity : MonoBehaviour
             Weapon.Bow => "Shot",
             _ => "Punch"
         };
-        animator.Play(attackAnimation);
+        PlayAnimation(attackAnimation);
         animator.speed = 1;
         states["Attack"] = true;
         StartCoroutine(ResetAnimator());

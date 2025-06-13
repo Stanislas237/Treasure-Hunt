@@ -16,24 +16,34 @@ public class Arrow : MonoBehaviour
     /// <summary>
     /// The GameObject that launched the arrow.
     /// </summary>
-    private GameObject Launcher;
+    private Entity Launcher;
 
     /// <summary>
     /// Initializes the arrow with a specified direction.
     /// </summary>
-    /// <param name="dir">Direction in which the arrow should be launched.</param>
-    public void Initialize(Vector3 pos, GameObject launcher)
+    public void Initialize(Vector3 pos, Entity launcher)
     {
         target = pos;
         Launcher = launcher;
-        Destroy(gameObject, 5f); // Destroy the arrow after 5 seconds
+
+        if (launcher.nPlayer == null)
+            Destroy(gameObject, 5f); // Destroy the arrow after 5 seconds
+        // else
+        //     N
     }
+
+    // public void NetworkInitialize(Vector3 pos, GameObject launcher)
+    // {
+    //     target = pos;
+    //     Launcher = launcher;
+    //     Destroy(gameObject, 5f); // Destroy the arrow after 5 seconds
+    // }
 
     private void Update() => transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime); // Move the arrow
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject == Launcher)
+        if (other.gameObject == Launcher.gameObject)
             return; // Ignore collision with the launcher
         if (other.gameObject.CompareTag("Terrain"))
             Destroy(gameObject); // Détruire la flèche lorsqu'elle touche le sol
@@ -41,7 +51,7 @@ public class Arrow : MonoBehaviour
         {
             int damages = Mathf.Min(5, e.BonusPoints);
             e.TakeDamage(damages); // Infliger des dégâts au joueur
-            Launcher.GetComponent<Entity>().AddPoints(damages); // Ajouter les points du joueur à soi-même
+            Launcher.AddPoints(damages); // Ajouter les points du joueur à soi-même
             Destroy(gameObject); // Détruire la flèche après avoir touché le joueur
         }
     }

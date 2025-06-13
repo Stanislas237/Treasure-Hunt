@@ -56,19 +56,11 @@ public class GameMaster : MonoBehaviour
     {
         foreach (var prefab in PrefabsToModify)
         {
-            if (prefab.GetComponent<NetworkIdentity>() == null)
-                prefab.AddComponent<NetworkIdentity>();
+            if (prefab.TryGetComponent(out NetworkIdentity ni))
+                ni.enabled = true;
 
-            if (prefab.GetComponent<NetworkTransformUnreliable>() == null)
-            {
-                var nt = prefab.AddComponent<NetworkTransformUnreliable>();
-                nt.syncPosition = true;
-                nt.syncRotation = true;
-                nt.syncScale = false; // Éviter de synchroniser l’échelle si ce n'est pas nécessaire
-
-                nt.interpolatePosition = true;
-                nt.interpolateRotation = true;
-            }
+            if (prefab.TryGetComponent(out NetworkTransformUnreliable nt))
+                nt.enabled = true;
 
             if (!NetworkingManager.networkManager.spawnPrefabs.Contains(prefab))
                 NetworkingManager.networkManager.spawnPrefabs.Add(prefab);
@@ -81,10 +73,10 @@ public class GameMaster : MonoBehaviour
         foreach (var prefab in PrefabsToModify)
         {
             if (prefab.TryGetComponent(out NetworkIdentity ni))
-                Destroy(ni);
+                ni.enabled = false;
 
             if (prefab.TryGetComponent(out NetworkTransformUnreliable nt))
-                Destroy(nt);
+                nt.enabled = false;
         }
         Debug.Log("Solo mode set, prefabs updated.");
     }

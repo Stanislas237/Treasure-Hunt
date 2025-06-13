@@ -4,28 +4,18 @@ using TMPro;
 
 public class PlayerUI : MonoBehaviour
 {
-    [SerializeField]
     private TextMeshProUGUI textPoints;
-    [SerializeField]
     private TextMeshProUGUI nameText;
-    [SerializeField]
     private TextMeshProUGUI MudText;
-    [SerializeField]
     private TextMeshProUGUI SpikeText;
-    [SerializeField]
     private Image weaponIcon;
 
-    /// <summary>
-    /// Le joueur que l'UI doit suivre.
-    /// </summary>
-    public Transform player;
+    public RectTransform rectTransform;
 
-    private RectTransform rectTransform;
-    private Camera mainCamera;
-    private Canvas parentCanvas;
-
-    private Sprite SwordIcon;
-    private Sprite BowIcon;
+    private static Canvas parentCanvas;
+    private static Camera mainCamera;
+    private static Sprite SwordIcon;
+    private static Sprite BowIcon;
 
     public void UpdatePoints(int points) => textPoints.text = $"np : {points}";
     public void UpdateWeaponIcon(string weapon) => weaponIcon.sprite = weapon == "Sword" ? SwordIcon : BowIcon;
@@ -37,19 +27,22 @@ public class PlayerUI : MonoBehaviour
 
     void Start()
     {
-        nameText.text = GameManager.PlayerName;
-        rectTransform = textPoints.transform.parent.GetComponent<RectTransform>();
-        mainCamera = Camera.main;
-        parentCanvas = textPoints.GetComponentInParent<Canvas>();
+        if (rectTransform != null)
+            Initialize(rectTransform);
 
         // Chargement des icônes
-        SwordIcon = Resources.Load<Sprite>("Props/Sprites/Sword");
-        BowIcon = Resources.Load<Sprite>("Props/Sprites/Bow");
+        if (SwordIcon == null)
+            SwordIcon = Resources.Load<Sprite>("Props/Sprites/Sword");
+        if (BowIcon == null)
+            BowIcon = Resources.Load<Sprite>("Props/Sprites/Bow");
     }
 
     void LateUpdate()
     {
-        Vector3 worldPos = player.position + new Vector3(0, 2.5f, 0); // Ajustez la hauteur ici
+        if (rectTransform == null)
+            return;
+
+        Vector3 worldPos = transform.position + new Vector3(0, 2.5f, 0); // Ajustez la hauteur ici
         Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
 
         // Conversion en coordonnées locales du Canvas
@@ -62,5 +55,22 @@ public class PlayerUI : MonoBehaviour
 
         // Ajustement final de position
         rectTransform.localPosition = localPos + new Vector2(0, 20f); // Offset en pixels si nécessaire
+    }
+
+    public void Initialize(RectTransform RT)
+    {
+        rectTransform = RT;
+        nameText = rectTransform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        textPoints = rectTransform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        weaponIcon = rectTransform.GetChild(2).GetComponent<Image>();
+
+        var p = rectTransform.parent;
+        MudText = p.GetChild(1).GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
+        SpikeText = p.GetChild(1).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
+
+        parentCanvas = p.parent.GetComponent<Canvas>();
+
+        if (mainCamera == null)
+            mainCamera = Camera.main;
     }
 }

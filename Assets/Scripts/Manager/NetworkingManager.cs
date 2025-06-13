@@ -4,7 +4,6 @@ using Mirror;
 public class NetworkingManager : GameManager
 {
     public static NetworkManager networkManager;
-    public static System.Collections.Generic.Dictionary<uint, string> playerNames;
 
     protected override bool Awake()
     {
@@ -18,6 +17,14 @@ public class NetworkingManager : GameManager
 
         networkManager.gameObject.SetActive(true);
         return true;
+    }
+
+    
+    protected override void InstantiateCoin()
+    {
+        var prefabName = Random.Range(0, 10) > 7 ? "Treasure" : "Coin";
+        if (NetworkServer.active)
+            Players[0].nPlayer.CmdSpawnObject(prefabName, GenerateRandomPointInOval(), Quaternion.Euler(0, 0, 90));
     }
 
     private void OnDisable() => Destroy(networkManager.gameObject);
