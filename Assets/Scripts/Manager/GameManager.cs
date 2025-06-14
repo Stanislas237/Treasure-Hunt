@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
     public static List<Transform> SpawnedTreasures { get; private set; } = new();
     public static List<Entity> Players { get; private set; } = new();
 
-    public static string PlayerName { get; private set; } = "StanK237";
+    public static string PlayerName { get; private set; } = "NoName";
 
     protected virtual bool Awake()
     {

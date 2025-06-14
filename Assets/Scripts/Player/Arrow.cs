@@ -43,7 +43,7 @@ public class Arrow : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject == Launcher.gameObject)
+        if (other.gameObject == Launcher?.gameObject)
             return; // Ignore collision with the launcher
         if (other.gameObject.CompareTag("Terrain"))
         {

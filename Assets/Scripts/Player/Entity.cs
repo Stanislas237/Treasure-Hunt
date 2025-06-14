@@ -28,7 +28,7 @@ public abstract class Entity : MonoBehaviour
     /// <summary>
     /// Weapon currently equipped by the player.
     /// </summary>
-    private Weapon weapon = Weapon.None;
+    private Weapon weapon = Weapon.Bow;
     protected string CurrentWeapon => weapon.ToString(); // Retourne le nom de l'arme actuelle
     /// <summary>
     /// The arrow prefab to be instantiated when the player uses a bow.
@@ -37,7 +37,18 @@ public abstract class Entity : MonoBehaviour
     /// <summary>
     /// Player's points.
     /// </summary>
-    public int BonusPoints { get; protected set; } = 0;
+    private int _points;
+    public int BonusPoints
+    {
+        get => nPlayer == null ? _points : nPlayer.BonusPoints;
+        protected set
+        {
+            if (nPlayer == null)
+                _points = value;
+            else
+                nPlayer.BonusPoints = value;
+        }
+    }
     /// <summary>
     /// The input for player movement.
     /// </summary>

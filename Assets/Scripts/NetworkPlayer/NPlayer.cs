@@ -22,7 +22,7 @@ public class NPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(OnWeaponChanged))]
     private string weapon = "None";
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdSetWeapon(string name) => weapon = name;
 
     void OnWeaponChanged(string _, string value) => player?.EquipWeapon(value);
@@ -31,22 +31,22 @@ public class NPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(OnAnimChanged))]
     private string anim = "Idle";
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdSetAnim(string name) => anim = name;
 
     void OnAnimChanged(string _, string value) => animator?.Play(value);
 
 
     [SyncVar(hook = nameof(OnPointsChanged))]
-    private int BonusPoints;
+    public int BonusPoints;
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdSetPoints(int value) => BonusPoints = value;
 
     void OnPointsChanged(int _, int value) => playerUI?.UpdatePoints(value);
 
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdSpawnArrow(Vector3 pos, Quaternion rot, Vector3 target, NetworkConnectionToClient _ = null)
     {
         var arrow = Instantiate(Entity.ArrowPrefab, pos, rot);
@@ -66,7 +66,7 @@ public class NPlayer : NetworkBehaviour
         }
     }
 
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdSpawnObject(string name, Vector3 pos, Quaternion rot)
     {
         if (isServer)
@@ -100,53 +100,52 @@ public class NPlayer : NetworkBehaviour
 
 
     #region Custom NetworkTransform
-    [SyncVar]
-    private Vector3 _syncedPosition;
+    // [SyncVar]
+    // private Vector3 _syncedPosition;
     
-    [SyncVar]
-    private Quaternion _syncedRotation;
+    // [SyncVar]
+    // private Quaternion _syncedRotation;
 
-    [Header("Custom Network Transform Settings")]
-    [SerializeField]
-    private float _positionLerpSpeed = 15f;
-    [SerializeField]
-    private float _rotationLerpSpeed = 15f;
-    [SerializeField]
-    private float _threshold = 0.1f; // Seuil de sync
+    // [Header("Custom Network Transform Settings")]
+    // [SerializeField]
+    // private float _positionLerpSpeed = 15f;
+    // [SerializeField]
+    // private float _rotationLerpSpeed = 15f;
+    // [SerializeField]
+    // private float _threshold = 0.1f; // Seuil de sync
 
-    private void Update()
-    {
-        if (isLocalPlayer)
-            UpdateServerTransform();
-        else
-            ApplyInterpolatedTransform();
-    }
+    // private void Update()
+    // {
+    //     if (isLocalPlayer)
+    //     {
+    //         if (Vector3.Distance(_syncedPosition, transform.position) > _threshold)
+    //             CmdUpdatePos();            
+    //     }
+    //     else
+    //         InterpolatePos();
+    // }
 
-    [ServerCallback]
-    private void UpdateServerTransform()
-    {
-        // Synchronise seulement si le changement dépasse le seuil
-        if (Vector3.Distance(_syncedPosition, transform.position) > _threshold)
-        {
-            _syncedPosition = transform.position;
-            _syncedRotation = transform.rotation;
-        }
-    }
+    // [Command]
+    // private void CmdUpdatePos()
+    // {
+    //     _syncedPosition = transform.position;
+    //     _syncedRotation = transform.rotation;
+    // }
 
-    private void ApplyInterpolatedTransform()
-    {
-        transform.position = Vector3.Lerp(
-            transform.position, 
-            _syncedPosition, 
-            _positionLerpSpeed * Time.deltaTime
-        );
+    // private void InterpolatePos()
+    // {
+    //     transform.position = Vector3.Lerp(
+    //         transform.position, 
+    //         _syncedPosition, 
+    //         _positionLerpSpeed * Time.deltaTime
+    //     );
 
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation, 
-            _syncedRotation, 
-            _rotationLerpSpeed * Time.deltaTime
-        );
-    }
+    //     transform.rotation = Quaternion.Slerp(
+    //         transform.rotation, 
+    //         _syncedRotation, 
+    //         _rotationLerpSpeed * Time.deltaTime
+    //     );
+    // }
     #endregion
 
 
