@@ -279,7 +279,7 @@ public abstract class Entity : MonoBehaviour
         StartCoroutine(ResetAnimator());
     }
 
-    public virtual void AddPoints(int points) => BonusPoints += points;
+    public virtual void AddPoints(int points) => BonusPoints = Mathf.Max(BonusPoints + points, 0);
 
     public virtual void ThrowTrap(string trapType)
     {

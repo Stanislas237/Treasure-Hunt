@@ -3,17 +3,10 @@ using Mirror;
 
 public class RoomPlayer : NetworkRoomPlayer
 {
-    [SyncVar, HideInInspector]
-    public string PlayerName = GameManager.PlayerName;
-
-    public override void OnStartLocalPlayer()
-    {
-        base.OnStartLocalPlayer();
-        CmdRegisterPlayer(netId);
-    }
+    public override void OnStartLocalPlayer() => CmdRegisterPlayer(GameManager.PlayerName);
 
     [Command]
-    void CmdRegisterPlayer(uint netID) => RoomPlayerManager.AddPlayer(netID, PlayerName);
+    void CmdRegisterPlayer(string name) => RoomPlayerManager.AddPlayer(netId, name);
 
     public override void OnStopLocalPlayer()
     {

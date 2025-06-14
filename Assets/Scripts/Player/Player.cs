@@ -39,7 +39,7 @@ public class Player : Entity
         return true;
     }
 
-    private void OnDisable() => inputActions.Player.Disable();
+    private void OnDisable() => inputActions?.Player.Disable();
 
     public override void EquipWeapon(string newWeapon)
     {

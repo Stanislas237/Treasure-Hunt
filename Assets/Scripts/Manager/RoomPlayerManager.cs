@@ -22,6 +22,16 @@ public class RoomPlayerManager : NetworkBehaviour
 
     private void Awake() => Instance = this;
     private void Start() => InvokeRepeating(nameof(UpdateUI), 1, 1);
+    // private void OnDisable()
+    // {
+    //     if (!NetworkServer.active || Singleton == null)
+    //         return;
+
+    //     foreach (var roomPlayer in new List<NetworkRoomPlayer>(Singleton.roomSlots))
+    //         if (roomPlayer != null && roomPlayer.gameObject != null)
+    //             NetworkServer.Destroy(roomPlayer.gameObject);
+    //     Singleton.roomSlots.Clear();
+    // }
 
     void UpdateUI()
     {
@@ -44,7 +54,9 @@ public class RoomPlayerManager : NetworkBehaviour
         {
             if (!uiPlayers.ContainsKey(player.netId))
             {
-                Debug.Log("Dans uiPlayers : netId = " + player.netId + ". Nbre total : " + Singleton.roomSlots.Count);
+                if (!playerNames.ContainsKey(player.netId))
+                    continue;
+
                 var obj = Instantiate(playerListContainer.GetChild(0).gameObject, playerListContainer);
                 obj.SetActive(true);
                 obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = playerNames[player.netId];
@@ -66,7 +78,7 @@ public class RoomPlayerManager : NetworkBehaviour
                 else
                     DisplayPlayerData("", "", Color.clear, obj.transform, null);
             }
-
+            else
             try
             {
                 if (player.readyToBegin)
@@ -85,10 +97,10 @@ public class RoomPlayerManager : NetworkBehaviour
 
     void DisplayPlayerData(string readyText, string buttonText, Color? buttonColor, Transform element, UnityAction action)
     {
-        if (!string.IsNullOrEmpty(readyText))
+        if (readyText != null)
             element.GetChild(1).GetComponent<TextMeshProUGUI>().text = readyText;
 
-        if (!string.IsNullOrEmpty(buttonText))
+        if (buttonText != null)
             element.GetChild(2).GetChild(0).GetComponent<TextMeshProUGUI>().text = buttonText;
 
         if (buttonColor != null)
@@ -114,8 +126,6 @@ public class RoomPlayerManager : NetworkBehaviour
             if (Instance.playerNames.ContainsKey(netID))
                 Instance.playerNames.Remove(netID);
     }
-
-    public static string GetPlayer(uint netID) => Instance.playerNames[netID];
 
     public void ToMenu() => Tools.LoadScene("Menu");
 }

@@ -58,7 +58,10 @@ public class GameMaster : MonoBehaviour
         foreach (var prefab in PrefabsToModify)
         {
             if (prefab.TryGetComponent(out NetworkIdentity ni))
+            {
                 ni.enabled = true;
+                NetworkClient.RegisterPrefab(prefab);
+            }
 
             if (prefab.TryGetComponent(out NetworkTransformUnreliable nt))
                 nt.enabled = true;

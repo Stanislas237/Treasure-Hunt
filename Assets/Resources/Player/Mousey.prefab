@@ -306,7 +306,6 @@ GameObject:
   - component: {fileID: 9157181290297402665}
   - component: {fileID: 2155466324476150776}
   - component: {fileID: 6721225688902203086}
-  - component: {fileID: -8021541598317728962}
   m_Layer: 0
   m_Name: Mousey
   m_TagString: Player
@@ -412,6 +411,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72c0bdc13e9b40e418886030a651b497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nPlayer: {fileID: 0}
 --- !u!114 &9157181290297402665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -440,6 +440,10 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  playerName: 
+  _positionLerpSpeed: 15
+  _rotationLerpSpeed: 15
+  _threshold: 0.1
 --- !u!114 &6721225688902203086
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -457,40 +461,6 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 2
   hasSpawned: 0
---- !u!114 &-8021541598317728962
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 681843342317652952}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a553cb17010b2403e8523b558bffbc14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  target: {fileID: 5917252856477233438}
-  syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
-  onlySyncOnChange: 1
-  compressRotation: 1
-  interpolatePosition: 1
-  interpolateRotation: 1
-  interpolateScale: 0
-  coordinateSpace: 0
-  timelineOffset: 1
-  showGizmos: 0
-  showOverlay: 0
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
-  bufferResetMultiplier: 3
-  useFixedUpdate: 0
-  positionSensitivity: 0.01
-  rotationSensitivity: 0.01
-  scaleSensitivity: 0.01
 --- !u!1 &1211233112864268726
 GameObject:
   m_ObjectHideFlags: 0
