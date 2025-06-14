@@ -14,13 +14,14 @@ public class Player : Entity
     /// </summary>
     PlayerUI playerUI;
 
-    protected override void Start()
+    protected override bool Start()
     {
         // Getting Player UI
         playerUI = GetComponent<PlayerUI>();
 
         // Parent's Start method
-        base.Start();
+        if (!base.Start())
+            return false;
 
         // Initialize input actions
         inputActions = new();
@@ -35,6 +36,7 @@ public class Player : Entity
             if (trapQuantities["Mud"] > 0) ThrowTrap("Mud");
             else ThrowTrap("Spike");
         };
+        return true;
     }
 
     private void OnDisable() => inputActions.Player.Disable();
@@ -43,15 +45,14 @@ public class Player : Entity
     {
         base.EquipWeapon(newWeapon);
         playerUI.UpdateWeaponIcon(newWeapon); // Mettre à jour l'icône de l'arme dans l'interface utilisateur
+        nPlayer?.CmdSetWeapon(newWeapon);
     }
 
     public override void AddPoints(int points)
     {
         base.AddPoints(points);
         playerUI.UpdatePoints(BonusPoints); // Mettre à jour l'interface utilisateur avec les nouveaux points
-
-        if (nPlayer != null)
-            nPlayer.CmdSetPoints(BonusPoints);
+        nPlayer?.CmdSetPoints(BonusPoints);
     }
 
     public override void ThrowTrap(string trapType)

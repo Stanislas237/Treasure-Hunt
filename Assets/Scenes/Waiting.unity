@@ -1027,7 +1027,7 @@ MonoBehaviour:
   evaluationInterval: 3
   timeInterpolationGui: 0
   showRoomGUI: 0
-  minPlayers: 1
+  minPlayers: 2
   roomPlayerPrefab: {fileID: 1922716390683578943, guid: d69697d91c975af4f9b29c9197613606, type: 3}
   RoomScene: Assets/Scenes/Waiting.unity
   GameplayScene: Assets/Scenes/Game.unity

@@ -89,7 +89,7 @@ public abstract class Entity : MonoBehaviour
     public NPlayer nPlayer;
 
 
-    protected virtual void Start()
+    protected virtual bool Start()
     {
         GameManager.Players.Add(this);
 
@@ -103,12 +103,12 @@ public abstract class Entity : MonoBehaviour
             if (!nPlayer.isLocalPlayer)
             {
                 enabled = false;
-                return;
+                return false;
             }
 
         // Load the trap prefabs
         if (MudPrefab == null)
-                MudPrefab = Resources.Load<GameObject>("Props/Traps/Mud/Mud");
+            MudPrefab = Resources.Load<GameObject>("Props/Traps/Mud/Mud");
         if (SpikePrefab == null)
             SpikePrefab = Resources.Load<GameObject>("Props/Traps/SpikeTrap/SpikeTrap");
         if (ArrowPrefab == null)
@@ -116,13 +116,13 @@ public abstract class Entity : MonoBehaviour
 
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        return true;
     }
 
     private void PlayAnimation(string name)
     {
         animator.Play(name);
-        if (nPlayer != null)
-            nPlayer.CmdSetAnim(name);
+        nPlayer?.CmdSetAnim(name);
     }
 
     protected IEnumerator ResetAnimator()
@@ -199,12 +199,16 @@ public abstract class Entity : MonoBehaviour
 
     private void FireArrow(Transform target, float predictionTime)
     {
-        Vector3 targetPosition = target ? target.position + Vector3.up * 0.5f : transform.position + transform.forward * 50; // Si pas de cible, tirer droit devant
-
-        // Instancier la flèche et lui appliquer une force
-        GameObject arrow = Instantiate(ArrowPrefab, transform.position + Vector3.up * 0.5f, Quaternion.identity);
-        arrow.transform.right = targetPosition - transform.position; // Orienter la flèche vers la cible
-        arrow.GetComponent<Arrow>().Initialize(targetPosition + arrow.transform.right * 20, this); // Initialiser la flèche avec la position de la cible et le lanceur
+        var targetPosition = target ? target.position + Vector3.up * 0.5f : transform.position + transform.forward * 50; // Si pas de cible, tirer droit devant
+        var arrowDirection = targetPosition - transform.position;
+        var arrowPosition = transform.position + Vector3.up * 0.5f;
+        var arrowRotation = Quaternion.LookRotation(arrowDirection) * Quaternion.Euler(0, 90f, 0);
+        
+        // Instancier la flèche et lui appliquer une "force"
+        if (nPlayer == null)
+            Instantiate(ArrowPrefab, arrowPosition, arrowRotation).GetComponent<Arrow>().Initialize(targetPosition + arrowDirection * 20, this);
+        else
+            nPlayer.CmdSpawnArrow(arrowPosition, arrowRotation, targetPosition + arrowDirection * 20);
     }
 
     public virtual void EquipWeapon(string newWeapon)
@@ -285,7 +289,11 @@ public abstract class Entity : MonoBehaviour
             if (trapPrefab != null)
             {
                 trapQuantities[trapType]--;
-                Instantiate(trapPrefab, transform.position - transform.forward * 1.5f + Vector3.up * 0.1f, Quaternion.identity);
+
+                if (nPlayer == null)
+                    Instantiate(trapPrefab, transform.position - transform.forward * 1.5f + Vector3.up * 0.1f, Quaternion.identity);
+                else
+                    nPlayer.CmdSpawnObject(trapType, transform.position - transform.forward * 1.5f + Vector3.up * 0.1f, Quaternion.identity);
             }
         }
     }

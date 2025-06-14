@@ -17,11 +17,20 @@ public class NPlayer : NetworkBehaviour
         var txtCtn = Instantiate(TextDataParent.GetChild(0), TextDataParent);
         txtCtn.gameObject.SetActive(true);
         txtCtn.GetChild(0).GetComponent<TextMeshProUGUI>().text = value;
-        GetComponent<PlayerUI>().Initialize((RectTransform)txtCtn);
+        playerUI.Initialize((RectTransform)txtCtn);
 
         if (!isLocalPlayer)
             Destroy(txtCtn.GetChild(2).gameObject);
     }
+
+
+    [SyncVar(hook = nameof(OnWeaponChanged))]
+    private string weapon = "None";
+
+    [Command]
+    public void CmdSetWeapon(string name) => weapon = name;
+
+    void OnWeaponChanged(string _, string value) => player.EquipWeapon(value);
 
 
     [SyncVar(hook = nameof(OnAnimChanged))]
@@ -43,6 +52,26 @@ public class NPlayer : NetworkBehaviour
 
 
     [Command]
+    public void CmdSpawnArrow(Vector3 pos, Quaternion rot, Vector3 target, NetworkConnectionToClient _ = null)
+    {
+        var arrow = Instantiate(Entity.ArrowPrefab, pos, rot);
+        NetworkServer.Spawn(arrow);
+        TargetReceiveSpawnedObj(_, arrow, target);
+    }
+
+    [TargetRpc]
+    private void TargetReceiveSpawnedObj(NetworkConnection _, GameObject obj, Vector3 target)
+    {
+        // Reçu uniquement par le client appelant
+        Debug.Log($"Objet spawné avec ID: {obj.GetComponent<NetworkIdentity>().netId}");
+        if (target != null)
+        {
+            CmdInitArrow(obj, target);
+            obj.GetComponent<Arrow>().Initialize(target, player);
+        }
+    }
+
+    [Command]
     public void CmdSpawnObject(string name, Vector3 pos, Quaternion rot)
     {
         if (isServer)
@@ -57,26 +86,27 @@ public class NPlayer : NetworkBehaviour
                 case "Mud":
                     NetworkServer.Spawn(Instantiate(Entity.MudPrefab, pos, rot));
                     break;
-                case "Arrow":
-                    NetworkServer.Spawn(Instantiate(Entity.ArrowPrefab, pos, rot));
-                    break;
                 case "Spike":
                     NetworkServer.Spawn(Instantiate(Entity.SpikePrefab, pos, rot));
                     break;
             }
     }
 
+    [Command]
+    public void CmdDestroyObject(GameObject obj) => NetworkServer.Destroy(obj);
 
-    // [Command]
-    // public void CmdInitArrow(GameObject Arrow, Vector3 target) => RpcInitArrow(Arrow, target);
 
-    // [ClientRpc]
-    // private void RpcInitArrow(GameObject Arrow, Vector3 target) => Arrow.GetComponent<Arrow>().Initialize(target, gameObject);
+    [Command]
+    public void CmdInitArrow(GameObject Arrow, Vector3 target) => RpcInitArrow(Arrow, target);
+
+    [ClientRpc]
+    private void RpcInitArrow(GameObject Arrow, Vector3 target) => Arrow.GetComponent<Arrow>().Initialize(target, player);
     #endregion
 
     private Transform TextDataParent;
     private Animator animator;
     private PlayerUI playerUI;
+    private Player player;
 
     void Start()
     {
@@ -86,6 +116,7 @@ public class NPlayer : NetworkBehaviour
 
         animator = GetComponent<Animator>();
         playerUI = GetComponent<PlayerUI>();
+        player = GetComponent<Player>();
     }
 
     public override void OnStartLocalPlayer() => CmdSetName(GameManager.PlayerName);

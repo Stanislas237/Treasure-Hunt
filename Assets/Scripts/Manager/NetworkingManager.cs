@@ -14,8 +14,6 @@ public class NetworkingManager : GameManager
 
         foreach (var entity in FindObjectsByType<Entity>(FindObjectsSortMode.None))
             Destroy(entity.gameObject);
-
-        networkManager.gameObject.SetActive(true);
         return true;
     }
 
@@ -26,6 +24,4 @@ public class NetworkingManager : GameManager
         if (NetworkServer.active)
             Players[0].nPlayer.CmdSpawnObject(prefabName, GenerateRandomPointInOval(), Quaternion.Euler(0, 0, 90));
     }
-
-    private void OnDisable() => Destroy(networkManager.gameObject);
 }

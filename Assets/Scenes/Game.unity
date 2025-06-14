@@ -5174,7 +5174,7 @@ GameObject:
   - component: {fileID: 1632440510}
   - component: {fileID: 1632440512}
   m_Layer: 5
-  m_Name: Trap
+  m_Name: Mud
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5281,19 +5281,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1632440510}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8602816712265716842}
-        m_TargetAssemblyTypeName: Player, Assembly-CSharp
-        m_MethodName: ThrowTrap
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Mud
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &1634526470
 GameObject:
   m_ObjectHideFlags: 0
@@ -5444,6 +5432,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51cbb31c08526374e90a4008de9e1f21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nPlayer: {fileID: 0}
   player: {fileID: 1114600486548375860}
   PlayerIsShootingBow: 0
 --- !u!1 &1656433605
@@ -6073,7 +6062,7 @@ GameObject:
   - component: {fileID: 1909721013}
   - component: {fileID: 1909721012}
   m_Layer: 5
-  m_Name: Trap
+  m_Name: Spike
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6142,19 +6131,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1909721013}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 8602816712265716842}
-        m_TargetAssemblyTypeName: Player, Assembly-CSharp
-        m_MethodName: ThrowTrap
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: Spike
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1909721013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9117,6 +9094,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72c0bdc13e9b40e418886030a651b497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nPlayer: {fileID: 0}
 --- !u!1 &8617524729475897474
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,19 +6,23 @@ public class PlayerUI : MonoBehaviour
 {
     private TextMeshProUGUI textPoints;
     private TextMeshProUGUI nameText;
-    private TextMeshProUGUI MudText;
-    private TextMeshProUGUI SpikeText;
     private Image weaponIcon;
 
     public RectTransform rectTransform;
 
+    private static TextMeshProUGUI MudText;
+    private static TextMeshProUGUI SpikeText;
     private static Canvas parentCanvas;
     private static Camera mainCamera;
     private static Sprite SwordIcon;
     private static Sprite BowIcon;
 
     public void UpdatePoints(int points) => textPoints.text = $"np : {points}";
-    public void UpdateWeaponIcon(string weapon) => weaponIcon.sprite = weapon == "Sword" ? SwordIcon : BowIcon;
+    public void UpdateWeaponIcon(string weapon)
+    {
+        if (weaponIcon != null)
+            weaponIcon.sprite = weapon == "Sword" ? SwordIcon : BowIcon;
+    }
     public void UpdateTrapCounts(int mud, int spike)
     {
         MudText.text = mud.ToString();
@@ -65,12 +69,16 @@ public class PlayerUI : MonoBehaviour
         weaponIcon = rectTransform.GetChild(2).GetComponent<Image>();
 
         var p = rectTransform.parent;
-        MudText = p.GetChild(1).GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
-        SpikeText = p.GetChild(1).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
-
-        parentCanvas = p.parent.GetComponent<Canvas>();
-
-        if (mainCamera == null)
+        if (parentCanvas == null)
+        {
+            parentCanvas = p.parent.GetComponent<Canvas>();
             mainCamera = Camera.main;
+            MudText = p.GetChild(1).GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
+            SpikeText = p.GetChild(1).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
+
+            if (!TryGetComponent(out NPlayer nPlayer) || nPlayer.isLocalPlayer)
+                foreach (Transform b in p.GetChild(1))
+                    b.GetComponent<Button>().onClick.AddListener(() => GetComponent<Player>().ThrowTrap(b.name));
+        }
     }
 }

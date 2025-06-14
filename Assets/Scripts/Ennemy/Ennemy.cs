@@ -17,11 +17,12 @@ public class Ennemy : Entity
     [HideInInspector]
     public bool PlayerIsShootingBow = false; // Placeholder for player bow shooting detection
 
-    protected override void Start()
+    protected override bool Start()
     {
         base.Start();
         InvokeRepeating(nameof(MakeDecision), 0f, decisionInterval);
         InvokeRepeating(nameof(ThrowTrap), 10f, 10f);
+        return true;
     }
 
     void OnDisable() => CancelInvoke(nameof(MakeDecision));
