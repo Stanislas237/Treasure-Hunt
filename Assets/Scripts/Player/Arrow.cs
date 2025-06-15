@@ -21,16 +21,11 @@ public class Arrow : MonoBehaviour
     /// <summary>
     /// Initializes the arrow with a specified direction.
     /// </summary>
-    public void Initialize(Vector3 pos, Entity launcher, bool calledByCommand = false)
+    public void Initialize(Vector3 pos, Entity launcher)
     {
         target = pos;
         Launcher = launcher;
         enabled = true;
-
-        if (calledByCommand)
-            Debug.LogError("Initialize called by command. Arrow has launcher " + (Launcher.nPlayer.ImHosting() ? "host" : "client") + " who has " + Launcher.BonusPoints + " points");
-        else
-            Debug.LogError("Normal Initialize. Arrow has launcher " + Launcher.name + "who has " + Launcher.BonusPoints + " points");
 
         if (launcher.nPlayer == null)
             Destroy(gameObject, 5f); // Destroy the arrow after 5 seconds
@@ -38,7 +33,7 @@ public class Arrow : MonoBehaviour
             Invoke(nameof(CustomDestroy), 5f);
     }
 
-    private void CustomDestroy() => Launcher?.nPlayer?.CmdDestroyObject(gameObject);
+    private void CustomDestroy() => Launcher?.nPlayer?.CmdDestroyObject(gameObject, 0);
 
     private void Update() => transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime); // Move the arrow
 

@@ -28,7 +28,7 @@ public abstract class Entity : MonoBehaviour
     /// <summary>
     /// Weapon currently equipped by the player.
     /// </summary>
-    private Weapon weapon = Weapon.Bow;
+    private Weapon weapon = Weapon.None;
     protected string CurrentWeapon => weapon.ToString(); // Retourne le nom de l'arme actuelle
     /// <summary>
     /// The arrow prefab to be instantiated when the player uses a bow.
@@ -152,8 +152,22 @@ public abstract class Entity : MonoBehaviour
             PlayAnimation("Idle");
     }
 
+    private void ResetPos()
+    {
+        controller.enabled = false; // Désactiver le CharacterController pour éviter les problèmes de collision            
+        transform.position = new Vector3(3.7f, 5f, 0); // Réinitialiser la position du joueur
+        AddPoints(-5); // Pénalité de points pour la mort
+        controller.enabled = true; // Réactiver le CharacterController
+    }
+
     private void Update()
     {
+        if (transform.position.y <= -20)
+        {
+            ResetPos();
+            return;
+        }
+
         previousPosition = transform.position;
 
         if (!(movementInput.x == 0 && movementInput.z == 0))
@@ -257,7 +271,7 @@ public abstract class Entity : MonoBehaviour
 
     public void SwordAttack()
     {
-        if (weapon != Weapon.Sword)
+        if (weapon != Weapon.Sword || (nPlayer && !nPlayer.isLocalPlayer))
             return;
 
         foreach (Transform target in FindTargetsInView())
@@ -271,7 +285,7 @@ public abstract class Entity : MonoBehaviour
 
     public void Punch()
     {
-        if (weapon != Weapon.None)
+        if (weapon != Weapon.None || (nPlayer && !nPlayer.isLocalPlayer))
             return;
 
         try
@@ -304,7 +318,10 @@ public abstract class Entity : MonoBehaviour
                 if (nPlayer == null)
                     Instantiate(trapPrefab, transform.position - transform.forward * 1.5f + Vector3.up * 0.1f, Quaternion.identity);
                 else
+                {
+                    Debug.Log("Spawning...");
                     nPlayer.CmdSpawnObject(trapType, transform.position - transform.forward * 1.5f + Vector3.up * 0.1f, Quaternion.identity);
+                }
             }
         }
     }
@@ -317,14 +334,7 @@ public abstract class Entity : MonoBehaviour
 
     private IEnumerator OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Respawn"))
-        {
-            controller.enabled = false; // Désactiver le CharacterController pour éviter les problèmes de collision            
-            transform.position = new Vector3(3.7f, 5f, 0); // Réinitialiser la position du joueur
-            AddPoints(-5); // Pénalité de points pour la mort
-            controller.enabled = true; // Réactiver le CharacterController
-        }
-        else if (other.gameObject.CompareTag("Mud"))
+        if (other.gameObject.CompareTag("Mud"))
         {
             foreach (var state in states.Keys.ToList())
                 states[state] = false; // Réinitialiser tous les états
@@ -335,7 +345,7 @@ public abstract class Entity : MonoBehaviour
             states["Mud"] = false; // Désactiver l'état de boue
             movementInput = Vector3.zero; // Arrêter le mouvement du joueur
 
-            StartCoroutine(TrapAnimation()); // Démarrer l'animation de disparition du piège
+            TrapAnimation(); // Démarrer l'animation de disparition du piège
         }
         else if (other.gameObject.CompareTag("Spike"))
         {
@@ -343,17 +353,21 @@ public abstract class Entity : MonoBehaviour
             yield return new WaitForSeconds(3f); // Attendre 3 secondes pour simuler l'effet de ralentissement
             states["Slow"] = false; // Désactiver l'état de ralentissement
 
-            StartCoroutine(TrapAnimation()); // Démarrer l'animation de disparition du piège
+            TrapAnimation(); // Démarrer l'animation de disparition du piège
         }
 
-        IEnumerator TrapAnimation()
+        void TrapAnimation()
         {
             if (other && other.TryGetComponent(out Animator anim))
             {
                 anim.Play("TrapFadeOut"); // Jouer l'animation de disparition du piège
-                yield return new WaitForSeconds(anim.GetCurrentAnimatorStateInfo(0).length); // Attendre la fin de l'animation
+
+                // Détruire l'objet bonus après application
                 if (other)
-                    Destroy(other.gameObject); // Détruire l'objet bonus après application                
+                    if (nPlayer == null)
+                        Destroy(other.gameObject, anim.GetCurrentAnimatorStateInfo(0).length);
+                    else
+                        nPlayer.CmdDestroyObject(other.gameObject, 0);
             }
         }
     }

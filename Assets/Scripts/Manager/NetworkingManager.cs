@@ -24,9 +24,9 @@ public class NetworkingManager : GameManager
 
     protected override void InstantiateCoin()
     {
-        var prefabName = Random.Range(0, 10) > 7 ? "Treasure" : "Coin";
         if (NetworkServer.active)
-            Players[0].nPlayer.CmdSpawnObject(prefabName, GenerateRandomPointInOval(), Quaternion.Euler(0, 0, 90));
+            Players[0].nPlayer.CmdSpawnObject(Random.Range(0, 10) > 7 ? "Treasure" : "Coin",
+            GenerateRandomPointInOval(), Quaternion.Euler(0, 0, 90));
     }
     
     public static void NetworkDestroy(GameObject target, float delay) => Instance.StartCoroutine(Instance.DestroyCoroutine(target, delay));

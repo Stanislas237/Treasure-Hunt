@@ -5,7 +5,7 @@ using TMPro;
 public class NPlayer : NetworkBehaviour
 {
 
-    #region Synced Vars
+    #region Synced Vars and Commands
     [SyncVar(hook = nameof(OnNameChanged))]
     public string playerName = string.Empty;
 
@@ -60,34 +60,33 @@ public class NPlayer : NetworkBehaviour
     private void TargetReceiveSpawnedArrow(NetworkConnection _, GameObject obj, Vector3 target)
     {
         if (isLocalPlayer)
-            obj.AddComponent<Arrow>().Initialize(target, player, true);
+            obj.AddComponent<Arrow>().Initialize(target, player);
     }
 
     [Command(requiresAuthority = false)]
     public void CmdSpawnObject(string name, Vector3 pos, Quaternion rot)
     {
-        if (isServer)
-            switch (name)
-            {
-                case "Coin":
-                    NetworkServer.Spawn(Instantiate(GameManager.CoinPrefab, pos, rot));
-                    break;
-                case "Treasure":
-                    NetworkServer.Spawn(Instantiate(GameManager.TreasurePrefab, pos, rot));
-                    break;
-                case "Mud":
-                    NetworkServer.Spawn(Instantiate(Entity.MudPrefab, pos, rot));
-                    break;
-                case "Spike":
-                    NetworkServer.Spawn(Instantiate(Entity.SpikePrefab, pos, rot));
-                    break;
-            }
+        switch (name)
+        {
+            case "Coin":
+                NetworkServer.Spawn(Instantiate(GameManager.CoinPrefab, pos, rot));
+                break;
+            case "Treasure":
+                NetworkServer.Spawn(Instantiate(GameManager.TreasurePrefab, pos, rot));
+                break;
+            case "Mud":
+                NetworkServer.Spawn(Instantiate(Entity.MudPrefab, pos, rot));
+                break;
+            case "Spike":
+                NetworkServer.Spawn(Instantiate(Entity.SpikePrefab, pos, rot));
+                break;
+        }
     }
 
 
 
     [Command(requiresAuthority = false)]
-    public void CmdDestroyObject(GameObject obj) => NetworkingManager.NetworkDestroy(obj, 0);
+    public void CmdDestroyObject(GameObject obj, float timer) => NetworkingManager.NetworkDestroy(obj, timer);
     #endregion
 
 
@@ -121,6 +120,4 @@ public class NPlayer : NetworkBehaviour
         else
             Destroy(txtCtn.GetChild(2).gameObject);
     }
-
-    public bool ImHosting() => isServer && isLocalPlayer;
 }

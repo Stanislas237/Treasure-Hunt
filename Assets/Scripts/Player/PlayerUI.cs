@@ -76,9 +76,9 @@ public class PlayerUI : MonoBehaviour
             MudText = p.GetChild(1).GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
             SpikeText = p.GetChild(1).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
 
-            if (!TryGetComponent(out NPlayer nPlayer) || nPlayer.isLocalPlayer)
-                foreach (Transform b in p.GetChild(1))
-                    b.GetComponent<Button>().onClick.AddListener(() => GetComponent<Player>().ThrowTrap(b.name));
         }
+        if (!TryGetComponent(out NPlayer nPlayer) || nPlayer.isLocalPlayer)
+            foreach (Transform b in p.GetChild(1))
+                b.GetComponent<Button>().onClick.AddListener(() => GetComponent<Player>().ThrowTrap(b.name));
     }
 }
