@@ -110,6 +110,9 @@ public abstract class Entity : MonoBehaviour
         Sword.SetActive(weapon == Weapon.Sword); // Start with the sword hidden or shown based on the weapon
         Bow.SetActive(weapon == Weapon.Bow); // Start with the bow hidden or shown based on the weapon
 
+        controller = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
+
         if (TryGetComponent(out nPlayer))
             if (!nPlayer.isLocalPlayer)
             {
@@ -124,15 +127,12 @@ public abstract class Entity : MonoBehaviour
             SpikePrefab = Resources.Load<GameObject>("Props/Traps/SpikeTrap/SpikeTrap");
         if (ArrowPrefab == null)
             ArrowPrefab = Resources.Load<GameObject>("Props/Arrow/Arrow");
-
-        controller = GetComponent<CharacterController>();
-        animator = GetComponent<Animator>();
         return true;
     }
 
     private void PlayAnimation(string name)
     {
-        animator.Play(name);
+        animator?.Play(name);
         nPlayer?.CmdSetAnim(name);
     }
 
@@ -217,7 +217,7 @@ public abstract class Entity : MonoBehaviour
         
         // Instancier la flèche et lui appliquer une "force"
         if (nPlayer == null)
-            Instantiate(ArrowPrefab, arrowPosition, arrowRotation).GetComponent<Arrow>().Initialize(targetPosition + arrowDirection * 20, this);
+            Instantiate(ArrowPrefab, arrowPosition, arrowRotation).AddComponent<Arrow>().Initialize(targetPosition + arrowDirection * 20, this);
         else
             nPlayer.CmdSpawnArrow(arrowPosition, arrowRotation, targetPosition + arrowDirection * 20);
     }

@@ -6,8 +6,7 @@ public class Arrow : MonoBehaviour
     /// <summary>
     /// Speed of the arrow when launched.
     /// </summary>
-    [SerializeField]
-    private float speed = 10f;
+    private readonly float speed = 20f;
 
     /// <summary>
     /// Direction in which the arrow is launched.
@@ -22,45 +21,51 @@ public class Arrow : MonoBehaviour
     /// <summary>
     /// Initializes the arrow with a specified direction.
     /// </summary>
-    public void Initialize(Vector3 pos, Entity launcher)
+    public void Initialize(Vector3 pos, Entity launcher, bool calledByCommand = false)
     {
         target = pos;
         Launcher = launcher;
+        enabled = true;
+
+        if (calledByCommand)
+            Debug.LogError("Initialize called by command. Arrow has launcher " + (Launcher.nPlayer.ImHosting() ? "host" : "client") + " who has " + Launcher.BonusPoints + " points");
+        else
+            Debug.LogError("Normal Initialize. Arrow has launcher " + Launcher.name + "who has " + Launcher.BonusPoints + " points");
 
         if (launcher.nPlayer == null)
             Destroy(gameObject, 5f); // Destroy the arrow after 5 seconds
         else
-            Invoke(nameof(Destroy), 5f);
+            Invoke(nameof(CustomDestroy), 5f);
     }
 
-    private void Destroy()
-    {
-        if (gameObject != null)
-            Launcher.nPlayer.CmdDestroyObject(gameObject);
-    }
+    private void CustomDestroy() => Launcher?.nPlayer?.CmdDestroyObject(gameObject);
 
     private void Update() => transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime); // Move the arrow
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject == Launcher?.gameObject)
-            return; // Ignore collision with the launcher
+        if (!enabled)
+            return;
+
+        if (other.gameObject == Launcher.gameObject)
+                return; // Ignore collision with the launcher
         if (other.gameObject.CompareTag("Terrain"))
         {
             if (Launcher.nPlayer == null)
                 Destroy(gameObject); // Détruire la flèche lorsqu'elle touche le sol
             else
-                Destroy();
+                CustomDestroy();
         }
         else if (other.gameObject.TryGetComponent(out Entity e))
         {
             int damages = Mathf.Min(5, e.BonusPoints);
             e.TakeDamage(damages); // Infliger des dégâts au joueur
             Launcher.AddPoints(damages); // Ajouter les points du joueur à soi-même
+
             if (Launcher.nPlayer == null)
                 Destroy(gameObject); // Détruire la flèche après avoir touché le joueur
             else
-                Destroy();
+                CustomDestroy();
         }
     }
 }

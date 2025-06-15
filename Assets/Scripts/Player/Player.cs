@@ -52,9 +52,7 @@ public class Player : Entity
     {
         base.AddPoints(points);
         playerUI.UpdatePoints(BonusPoints); // Mettre à jour l'interface utilisateur avec les nouveaux points
-
-        if (nPlayer && nPlayer.isLocalPlayer)
-            nPlayer.CmdSetPoints(BonusPoints);
+        nPlayer?.CmdSetPoints(BonusPoints);
     }
 
     public override void ThrowTrap(string trapType)

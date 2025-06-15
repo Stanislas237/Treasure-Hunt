@@ -47,23 +47,20 @@ public class NPlayer : NetworkBehaviour
 
 
     [Command(requiresAuthority = false)]
-    public void CmdSpawnArrow(Vector3 pos, Quaternion rot, Vector3 target, NetworkConnectionToClient _ = null)
+    public void CmdSpawnArrow(Vector3 position, Quaternion rotation, Vector3 XtendedTarget, NetworkConnectionToClient _ = null)
     {
-        var arrow = Instantiate(Entity.ArrowPrefab, pos, rot);
-        NetworkServer.Spawn(arrow);
-        TargetReceiveSpawnedObj(_, arrow, target);
+        var arrow = Instantiate(Entity.ArrowPrefab, position, rotation);
+        NetworkServer.Spawn(arrow, _);
+        NetworkingManager.NetworkDestroy(arrow, 6);
+        
+        TargetReceiveSpawnedArrow(_, arrow, XtendedTarget);
     }
 
     [TargetRpc]
-    private void TargetReceiveSpawnedObj(NetworkConnection _, GameObject obj, Vector3 target)
+    private void TargetReceiveSpawnedArrow(NetworkConnection _, GameObject obj, Vector3 target)
     {
-        // Reçu uniquement par le client appelant
-        Debug.Log($"Objet spawné avec ID: {obj.GetComponent<NetworkIdentity>().netId}");
-        if (target != null)
-        {
-            CmdInitArrow(obj, target);
-            obj.GetComponent<Arrow>().Initialize(target, player);
-        }
+        if (isLocalPlayer)
+            obj.AddComponent<Arrow>().Initialize(target, player, true);
     }
 
     [Command(requiresAuthority = false)]
@@ -87,65 +84,10 @@ public class NPlayer : NetworkBehaviour
             }
     }
 
-    [Command]
-    public void CmdDestroyObject(GameObject obj) => NetworkServer.Destroy(obj);
 
 
-    [Command]
-    public void CmdInitArrow(GameObject Arrow, Vector3 target) => RpcInitArrow(Arrow, target);
-
-    [ClientRpc]
-    private void RpcInitArrow(GameObject Arrow, Vector3 target) => Arrow.GetComponent<Arrow>().Initialize(target, player);
-    #endregion
-
-
-    #region Custom NetworkTransform
-    // [SyncVar]
-    // private Vector3 _syncedPosition;
-    
-    // [SyncVar]
-    // private Quaternion _syncedRotation;
-
-    // [Header("Custom Network Transform Settings")]
-    // [SerializeField]
-    // private float _positionLerpSpeed = 15f;
-    // [SerializeField]
-    // private float _rotationLerpSpeed = 15f;
-    // [SerializeField]
-    // private float _threshold = 0.1f; // Seuil de sync
-
-    // private void Update()
-    // {
-    //     if (isLocalPlayer)
-    //     {
-    //         if (Vector3.Distance(_syncedPosition, transform.position) > _threshold)
-    //             CmdUpdatePos();            
-    //     }
-    //     else
-    //         InterpolatePos();
-    // }
-
-    // [Command]
-    // private void CmdUpdatePos()
-    // {
-    //     _syncedPosition = transform.position;
-    //     _syncedRotation = transform.rotation;
-    // }
-
-    // private void InterpolatePos()
-    // {
-    //     transform.position = Vector3.Lerp(
-    //         transform.position, 
-    //         _syncedPosition, 
-    //         _positionLerpSpeed * Time.deltaTime
-    //     );
-
-    //     transform.rotation = Quaternion.Slerp(
-    //         transform.rotation, 
-    //         _syncedRotation, 
-    //         _rotationLerpSpeed * Time.deltaTime
-    //     );
-    // }
+    [Command(requiresAuthority = false)]
+    public void CmdDestroyObject(GameObject obj) => NetworkingManager.NetworkDestroy(obj, 0);
     #endregion
 
 
@@ -179,4 +121,6 @@ public class NPlayer : NetworkBehaviour
         else
             Destroy(txtCtn.GetChild(2).gameObject);
     }
+
+    public bool ImHosting() => isServer && isLocalPlayer;
 }

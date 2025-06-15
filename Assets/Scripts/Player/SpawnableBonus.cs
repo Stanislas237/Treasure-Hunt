@@ -15,7 +15,8 @@ public abstract class SpawnableBonus : MonoBehaviour
     {
         if (other.gameObject.TryGetComponent(out Entity e))
         {
-            ApplyBonus(e);
+            if (!e.nPlayer || e.nPlayer.isLocalPlayer)
+                ApplyBonus(e);
             if (NetworkServer.active)
                 NetworkServer.Destroy(gameObject);
             else
