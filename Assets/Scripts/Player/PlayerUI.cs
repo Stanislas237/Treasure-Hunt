@@ -77,7 +77,13 @@ public class PlayerUI : MonoBehaviour
             SpikeText = p.GetChild(1).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
 
             p.parent.GetChild(1).GetChild(3).GetComponent<Button>().onClick.AddListener(() => Tools.LoadScene("Menu"));
-            p.GetChild(3).GetComponent<Button>().onClick.AddListener(() => Tools.LoadScene("Menu"));
+            p.GetChild(3).GetComponent<Button>().onClick.AddListener(() => {
+                if (GameMaster.IsHost)
+                    GameManager.networkManager.StopHost();
+                else
+                    GameManager.networkManager.StopClient();
+                Tools.LoadScene("Menu");
+            });
         }
 
         if (!TryGetComponent(out NPlayer nPlayer) || nPlayer.isLocalPlayer)

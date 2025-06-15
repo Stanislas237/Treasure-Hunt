@@ -28,6 +28,9 @@ public class GameManager : MonoBehaviour
     {
         networkManager = FindFirstObjectByType<NetworkManager>(FindObjectsInactive.Include);
 
+        SpawnedTreasures = new();
+        Players = new();
+
         if (GetType() != GameMaster.GameType)
         {
             Destroy(this);
@@ -108,7 +111,7 @@ public class GameManager : MonoBehaviour
                 maxPoints = e.BonusPoints;
                 nbMaxPoints++;
             }
-            if (e is Player p && p.enabled)
+            if (e is Player p) if (p.enabled)
                 localPlayer = p;
         }
 

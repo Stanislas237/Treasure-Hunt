@@ -135,5 +135,12 @@ public class RoomPlayerManager : NetworkBehaviour
                 Instance.playerNames.Remove(netID);
     }
 
-    public void ToMenu() => Tools.LoadScene("Menu");
+    public void ToMenu()
+    {
+        if (GameMaster.IsHost)
+            Singleton.StopHost();
+        else
+            Singleton.StopClient();
+        Tools.LoadScene("Menu");
+    }
 }
