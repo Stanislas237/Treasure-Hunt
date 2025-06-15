@@ -4,18 +4,22 @@ using System.Collections.Generic;
 
 public class Ennemy : Entity
 {
-    private readonly float attackRange = 2f;
+    private readonly int attackRange = 4;
+    private readonly int escapeRange = 20;
     private readonly float decisionInterval = 0.5f;
-    private float lastJumpTime;
+    private readonly int jumpCooldown = 1;
 
-    private readonly float jumpCooldown = 1;
-    [SerializeField]
-    private Transform player;
+    private float lastJumpTime;
     private Transform closestTreasure;
     private bool isDodging;
     private bool isJumping;
+    private Vector2 escapeDirection = Vector2.zero;
+
     [HideInInspector]
     public bool PlayerIsShootingBow = false; // Placeholder for player bow shooting detection
+
+    [SerializeField]
+    private Transform player;
 
     protected override bool Start()
     {
@@ -49,8 +53,6 @@ public class Ennemy : Entity
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
         // Priorité 2: Si le joueur attaque avec un arc, esquiver
         if (PlayerIsShootingBow)
         {
@@ -58,18 +60,25 @@ public class Ennemy : Entity
             return;
         }
 
+        float distanceToPlayer = (transform.position - player.position).sqrMagnitude;
+
         // Priorité 3: Si proche du joueur, attaquer
         if (distanceToPlayer <= attackRange)
         {
             Attack();
             return;
         }
+        
 
         // Priorité 4: Comportement selon l'arme
         switch (CurrentWeapon)
         {
             case "None": default:
-                StopMove();
+                // Si désarmé, fuir
+                if (distanceToPlayer <= escapeRange)
+                    Escape();
+                else
+                    StopMove();
                 return;
             case "Sword":
                 InitMove(GetDirectionTo(player.position) * 0.75f);
@@ -122,6 +131,17 @@ public class Ennemy : Entity
 
         isDodging = false;
         PlayerIsShootingBow = false; // Réinitialiser l'état de tir du joueur
+    }
+
+    void Escape()
+    {
+        if (escapeDirection == Vector2.zero)
+            escapeDirection = -GetDirectionTo(player.position);
+
+        Vector2 targetPosition = new Vector2(transform.position.x - 3.5f, transform.position.z) + 8 * escapeDirection;
+        if (77 * Mathf.Pow(targetPosition.x, 2) + 81 * Mathf.Pow(targetPosition.y, 2) >= 6237)
+            escapeDirection = (Quaternion.Euler(0, 90f, 0) * escapeDirection).normalized;
+        InitMove(escapeDirection);
     }
 
     bool CheckForJump()

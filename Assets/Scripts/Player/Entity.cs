@@ -318,10 +318,7 @@ public abstract class Entity : MonoBehaviour
                 if (nPlayer == null)
                     Instantiate(trapPrefab, transform.position - transform.forward * 1.5f + Vector3.up * 0.1f, Quaternion.identity);
                 else
-                {
-                    Debug.Log("Spawning...");
                     nPlayer.CmdSpawnObject(trapType, transform.position - transform.forward * 1.5f + Vector3.up * 0.1f, Quaternion.identity);
-                }
             }
         }
     }

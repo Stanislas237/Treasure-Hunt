@@ -116,13 +116,13 @@ public class RoomPlayerManager : NetworkBehaviour
 
     public static void AddPlayer(uint netID, string name)
     {
-        if (Instance.isServer)
+        if (Instance && Instance.isServer)
             Instance.playerNames[netID] = name;
     }
 
     public static void RemovePlayer(uint netID)
     {
-        if (Instance.isServer)
+        if (Instance && Instance.isServer)
             if (Instance.playerNames.ContainsKey(netID))
                 Instance.playerNames.Remove(netID);
     }

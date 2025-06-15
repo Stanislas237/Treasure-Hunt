@@ -75,10 +75,13 @@ public class PlayerUI : MonoBehaviour
             mainCamera = Camera.main;
             MudText = p.GetChild(1).GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
             SpikeText = p.GetChild(1).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
-
         }
+
         if (!TryGetComponent(out NPlayer nPlayer) || nPlayer.isLocalPlayer)
+        {
+            nameText.text = GameManager.PlayerName;
             foreach (Transform b in p.GetChild(1))
                 b.GetComponent<Button>().onClick.AddListener(() => GetComponent<Player>().ThrowTrap(b.name));
+        }
     }
 }
