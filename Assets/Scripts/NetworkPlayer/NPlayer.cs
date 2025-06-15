@@ -120,4 +120,10 @@ public class NPlayer : NetworkBehaviour
         else
             Destroy(txtCtn.GetChild(2).gameObject);
     }
+
+    public override void OnStopClient()
+    {
+        Destroy(playerUI.rectTransform);
+        GameManager.Players.Remove(player);
+    }
 }

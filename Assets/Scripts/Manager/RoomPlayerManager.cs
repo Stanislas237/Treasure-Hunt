@@ -21,7 +21,7 @@ public class RoomPlayerManager : NetworkBehaviour
     private TextMeshProUGUI countText;
 
     private void Awake() => Instance = this;
-    
+
     private void Start()
     {
         InvokeRepeating(nameof(UpdateUI), 1, 1);
@@ -29,13 +29,15 @@ public class RoomPlayerManager : NetworkBehaviour
         if (GameMaster.IsHost)
         {
             Singleton.StartHost();
-            GetComponent<CustomDiscovery>().AdvertiseServer();
+            FindFirstObjectByType<CustomDiscovery>(FindObjectsInactive.Include).AdvertiseServer();
         }
         else
         {
-            Singleton.networkAddress = GameMaster.Address;
+            if (!string.IsNullOrEmpty(GameMaster.Address))
+                Singleton.networkAddress = GameMaster.Address;
+                
             Singleton.StartClient();
-            Destroy(GetComponent<CustomDiscovery>());
+            Destroy(FindFirstObjectByType<CustomDiscovery>(FindObjectsInactive.Include).gameObject);
         }
     }
 

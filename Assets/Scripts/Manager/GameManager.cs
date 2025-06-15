@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     private TextMeshProUGUI timerText;
     [SerializeField]
     private Transform EndGamePanel;
-    private float timeLeft = 180;
+    private float timeLeft = 5;
 
     public static GameObject CoinPrefab;
     public static GameObject TreasurePrefab;
@@ -98,8 +98,30 @@ public class GameManager : MonoBehaviour
         CancelInvoke();
         EndGamePanel.parent.GetChild(0).gameObject.SetActive(false);
 
-        var orderedList = Players.OrderByDescending(e => e.BonusPoints).ToList();
-        bool hasWon = orderedList[0].TryGetComponent(out Player p) && p.enabled;
+        // Récupérer le joueur local et le plus haut score
+        int maxPoints = 0, nbMaxPoints = 0;
+        Player localPlayer = null;
+        foreach (var e in Players)
+        {
+            if (e.BonusPoints > maxPoints)
+            {
+                maxPoints = e.BonusPoints;
+                nbMaxPoints++;
+            }
+            if (e is Player p && p.enabled)
+                localPlayer = p;
+        }
+
+        // Décider s'il gagne, perd, ou égalité
+        Decision d;
+        if (localPlayer?.BonusPoints >= maxPoints)
+            if (nbMaxPoints == 1)
+                d = Decision.Winner;
+            else
+                d = Decision.Draw;
+        else
+            d = Decision.Loser;
+
 
         foreach (var item in Players)
             item.enabled = false;
@@ -113,19 +135,26 @@ public class GameManager : MonoBehaviour
         StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(0).GetChild(1).GetComponent<TextMeshProUGUI>(), "Ranking", 50, 0.3f));
         yield return new WaitForSeconds(0.5f);
 
-        for (int i = 0; i < orderedList.Count; i++)
+        int i = 0;
+        foreach (var e in Players.OrderByDescending(e => e.BonusPoints).ToList())
         {
-            if (i > 3) break;
-
-            StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(1).GetChild(i).GetChild(0).GetComponent<TextMeshProUGUI>(), orderedList[i].GetName(), 36, 0.3f));
-            StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(1).GetChild(i).GetChild(1).GetComponent<TextMeshProUGUI>(), orderedList[i].BonusPoints.ToString(), 60, 0.3f));
+            StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(1).GetChild(i).GetChild(0).GetComponent<TextMeshProUGUI>(), e.GetName(), 36, 0.3f));
+            StartCoroutine(AnimateTextSizeCoroutine(EndGamePanel.GetChild(1).GetChild(i).GetChild(1).GetComponent<TextMeshProUGUI>(), e.BonusPoints.ToString(), 60, 0.3f));
             yield return new WaitForSeconds(0.5f);
+            i++;
         }
 
         var LastTextElement = EndGamePanel.GetChild(2).GetComponent<TextMeshProUGUI>();
-        StartCoroutine(AnimateTextSizeCoroutine(LastTextElement, hasWon ? "You Won" : "You Lost", 150, 0.3f));
-        LastTextElement.color = hasWon ? Color.green : Color.red;
+        StartCoroutine(AnimateTextSizeCoroutine(LastTextElement, d.ToString(), 150, 0.3f));
+        LastTextElement.color = d switch
+        {
+            Decision.Winner => Color.green,
+            Decision.Loser => Color.red,
+            _ => Color.yellow
+        };
     }
 
     public static void SetName(string newName) => PlayerName = newName;
 }
+
+enum Decision { Winner, Loser, Draw, }

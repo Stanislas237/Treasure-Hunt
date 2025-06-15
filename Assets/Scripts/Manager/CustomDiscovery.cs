@@ -1,9 +1,20 @@
 using Mirror;
 using Mirror.Discovery;
 using System.Net;
+using UnityEngine;
 
+[DisallowMultipleComponent]
 public class CustomDiscovery : NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResponse>
 {
+    public override void Start()
+    {
+        base.Start();
+
+        var RPM = FindFirstObjectByType<RoomPlayerManager>(FindObjectsInactive.Include);
+        if (RPM != null)
+            RPM.gameObject.SetActive(true);
+    }
+
     // Quand un client envoie une requête → que doit répondre le serveur ?
     protected override DiscoveryResponse ProcessRequest(DiscoveryRequest request, IPEndPoint endpoint) =>
         new DiscoveryResponse
