@@ -4,14 +4,10 @@ using Mirror;
 
 public class NetworkingManager : GameManager
 {
-    public static NetworkManager networkManager;
-
     public static NetworkingManager Instance;
 
     protected override bool Awake()
     {
-        networkManager = FindFirstObjectByType<NetworkManager>(FindObjectsInactive.Include);
-
         if (!base.Awake())
             return false;
 

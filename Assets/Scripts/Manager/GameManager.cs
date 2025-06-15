@@ -1,5 +1,6 @@
-using UnityEngine;
 using TMPro;
+using Mirror;
+using UnityEngine;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,10 +20,14 @@ public class GameManager : MonoBehaviour
     public static List<Transform> SpawnedTreasures { get; private set; } = new();
     public static List<Entity> Players { get; private set; } = new();
 
-    public static string PlayerName { get; private set; } = "NoName";
+    public static string PlayerName { get; private set; } = string.Empty;
+
+    public static NetworkManager networkManager;
 
     protected virtual bool Awake()
     {
+        networkManager = FindFirstObjectByType<NetworkManager>(FindObjectsInactive.Include);
+
         if (GetType() != GameMaster.GameType)
         {
             Destroy(this);
@@ -31,6 +36,9 @@ public class GameManager : MonoBehaviour
 
         try { GameMaster.Instance.LaunchGame(); }
         catch { FindFirstObjectByType<GameMaster>().LaunchGame(); }
+
+        if (networkManager)
+            Destroy(networkManager.gameObject);
 
         return true;
     }
@@ -118,4 +126,6 @@ public class GameManager : MonoBehaviour
         StartCoroutine(AnimateTextSizeCoroutine(LastTextElement, hasWon ? "You Won" : "You Lost", 150, 0.3f));
         LastTextElement.color = hasWon ? Color.green : Color.red;
     }
+
+    public static void SetName(string newName) => PlayerName = newName;
 }

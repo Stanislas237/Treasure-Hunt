@@ -21,17 +21,23 @@ public class RoomPlayerManager : NetworkBehaviour
     private TextMeshProUGUI countText;
 
     private void Awake() => Instance = this;
-    private void Start() => InvokeRepeating(nameof(UpdateUI), 1, 1);
-    // private void OnDisable()
-    // {
-    //     if (!NetworkServer.active || Singleton == null)
-    //         return;
+    
+    private void Start()
+    {
+        InvokeRepeating(nameof(UpdateUI), 1, 1);
 
-    //     foreach (var roomPlayer in new List<NetworkRoomPlayer>(Singleton.roomSlots))
-    //         if (roomPlayer != null && roomPlayer.gameObject != null)
-    //             NetworkServer.Destroy(roomPlayer.gameObject);
-    //     Singleton.roomSlots.Clear();
-    // }
+        if (GameMaster.IsHost)
+        {
+            Singleton.StartHost();
+            GetComponent<CustomDiscovery>().AdvertiseServer();
+        }
+        else
+        {
+            Singleton.networkAddress = GameMaster.Address;
+            Singleton.StartClient();
+            Destroy(GetComponent<CustomDiscovery>());
+        }
+    }
 
     void UpdateUI()
     {

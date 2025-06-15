@@ -1,4 +1,7 @@
+using TMPro;
+using Mirror;
 using UnityEngine;
+using System.Collections;
 using UnityEngine.SceneManagement;
 
 public class Menu : MonoBehaviour
@@ -7,9 +10,31 @@ public class Menu : MonoBehaviour
 
     private CustomDiscovery discovery;
 
+    [SerializeField]
+    Animator PanelAnimator;
+
+    [SerializeField]
+    TMP_InputField inputField;
+
+    void Start()
+    {
+        GameManager.SetName(PlayerPrefs.GetString("PlayerName", string.Empty));
+        inputField.text = GameManager.PlayerName;
+        inputField.onValueChanged.AddListener(newText =>
+        {
+            GameManager.SetName(newText);
+            PlayerPrefs.SetString("PlayerName", newText);
+            PlayerPrefs.Save();
+        });
+
+        var manager = FindFirstObjectByType<NetworkManager>(FindObjectsInactive.Include);
+        if (manager)
+            Destroy(manager.gameObject);
+    }
+
     public void OnClickHost()
     {
-        if (isSearchingServer)
+        if (isSearchingServer || IncorrectName())
             return;
 
         GameMaster.GameType = typeof(NetworkingManager);
@@ -17,14 +42,17 @@ public class Menu : MonoBehaviour
         Tools.LoadScene("Waiting");
     }
 
-    public void OnClickJoin()
+    public void OnClickJoin() => StartCoroutine(Join());
+
+    IEnumerator Join()
     {
-        if (isSearchingServer)
-            return;
+        if (isSearchingServer || IncorrectName())
+            yield break;
 
         isSearchingServer = true;
+        PanelAnimator.Play("Searching");
 
-        discovery = FindFirstObjectByType<CustomDiscovery>(FindObjectsInactive.Include);
+        discovery = FindFirstObjectByType<CustomDiscovery>();
         discovery.OnServerFound.AddListener(response =>
         {
             GameMaster.IsHost = false;
@@ -34,23 +62,29 @@ public class Menu : MonoBehaviour
 
         GameMaster.GameType = typeof(NetworkingManager);
         discovery.StartDiscovery();
-        Invoke(nameof(StopSearch), 3);
+
+        yield return null;
+        yield return new WaitForSeconds(PanelAnimator.GetCurrentAnimatorStateInfo(0).length);
+        
+        discovery.StopDiscovery();
+        isSearchingServer = false;
+        Debug.Log("Recherche de serveurs terminée.");
     }
 
     public void OnClickPlay()
     {
-        if (isSearchingServer)
+        if (isSearchingServer || IncorrectName())
             return;
 
         GameMaster.GameType = typeof(GameManager);
         Tools.LoadScene("Game");
     }
 
-    private void StopSearch()
+    private bool IncorrectName()
     {
-        discovery.StopDiscovery();
-        isSearchingServer = false;
-        Debug.Log("Recherche de serveurs terminée.");
+        if (string.IsNullOrEmpty(GameManager.PlayerName))
+            PanelAnimator.Play("EnterName");
+        return string.IsNullOrEmpty(GameManager.PlayerName);
     }
 }
 
