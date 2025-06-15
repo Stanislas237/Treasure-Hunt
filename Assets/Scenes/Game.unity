@@ -5379,8 +5379,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nPlayer: {fileID: 0}
-  player: {fileID: 1114600486548375860}
   PlayerIsShootingBow: 0
+  player: {fileID: 1114600486548375860}
 --- !u!1 &1656433605
 GameObject:
   m_ObjectHideFlags: 0

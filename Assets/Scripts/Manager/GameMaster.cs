@@ -7,8 +7,11 @@ public class GameMaster : MonoBehaviour
 {
     public static GameMaster Instance;
 
-    // public static Type GameType = typeof(NetworkingManager);
     public static Type GameType = typeof(GameManager);
+
+    public static bool IsHost;
+
+    public static string Address;
 
     private List<GameObject> PrefabsToModify;
 
