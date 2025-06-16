@@ -1,0 +1,1 @@
+C:\Users\STANISLAS KAMGA\Documents\GitHub\Treasure-Hunt\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\5x1f4py4\obj\arm64-v8a

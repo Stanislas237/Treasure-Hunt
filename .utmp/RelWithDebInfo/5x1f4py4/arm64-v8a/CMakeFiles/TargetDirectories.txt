@@ -1,0 +1,5 @@
+C:/Users/STANISLAS KAMGA/Documents/GitHub/Treasure-Hunt/.utmp/RelWithDebInfo/5x1f4py4/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/STANISLAS KAMGA/Documents/GitHub/Treasure-Hunt/.utmp/RelWithDebInfo/5x1f4py4/arm64-v8a/CMakeFiles/rebuild_cache.dir
+C:/Users/STANISLAS KAMGA/Documents/GitHub/Treasure-Hunt/.utmp/RelWithDebInfo/5x1f4py4/arm64-v8a/GameActivity/CMakeFiles/game.dir
+C:/Users/STANISLAS KAMGA/Documents/GitHub/Treasure-Hunt/.utmp/RelWithDebInfo/5x1f4py4/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+C:/Users/STANISLAS KAMGA/Documents/GitHub/Treasure-Hunt/.utmp/RelWithDebInfo/5x1f4py4/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir

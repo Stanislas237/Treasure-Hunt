@@ -395,7 +395,7 @@ public abstract class Entity : MonoBehaviour
         animator.speed = 1;
     }
 
-    protected void Jump()
+    public void Jump()
     {
         if (!controller.isGrounded || states["Attack"] || states["Hit"] || states["Mud"])
             return;
@@ -406,7 +406,7 @@ public abstract class Entity : MonoBehaviour
         StartCoroutine(ResetAnimator());
     }
 
-    protected void Attack()
+    public void Attack()
     {
         if (!controller.isGrounded || states["Attack"] || states["Hit"] || states["Mud"])
             return;

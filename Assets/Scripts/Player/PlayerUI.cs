@@ -4,6 +4,7 @@ using TMPro;
 
 public class PlayerUI : MonoBehaviour
 {
+    private const string MobileButtonsName = "BUTTONS - COMMAND";
     private TextMeshProUGUI textPoints;
     private TextMeshProUGUI nameText;
     private Image weaponIcon;
@@ -41,13 +42,11 @@ public class PlayerUI : MonoBehaviour
             BowIcon = Resources.Load<Sprite>("Props/Sprites/Bow");
     }
 
-    void LateUpdate()
-    {
-        if (rectTransform == null)
-            return;
 
-        Vector3 worldPos = transform.position + new Vector3(0, 2.5f, 0); // Ajustez la hauteur ici
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
+    public static Vector2 ScreenToCanvasPosition(Vector2 screenPos)
+    {
+        if (parentCanvas == null)
+            return Vector2.zero;
 
         // Conversion en coordonnées locales du Canvas
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -56,9 +55,19 @@ public class PlayerUI : MonoBehaviour
             parentCanvas.worldCamera,
             out Vector2 localPos
         );
+        return localPos;
+    }
+
+    void LateUpdate()
+    {
+        if (rectTransform == null)
+            return;
+
+        Vector3 worldPos = transform.position + new Vector3(0, 2.5f, 0); // Ajustez la hauteur ici
+        Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
 
         // Ajustement final de position
-        rectTransform.localPosition = localPos + new Vector2(0, 20f); // Offset en pixels si nécessaire
+        rectTransform.localPosition = ScreenToCanvasPosition(screenPos) + new Vector2(0, 20f); // Offset en pixels si nécessaire
     }
 
     public void Initialize(RectTransform RT)
@@ -94,6 +103,13 @@ public class PlayerUI : MonoBehaviour
             nameText.text = GameManager.PlayerName;
             foreach (Transform b in p.GetChild(1))
                 b.GetComponent<Button>().onClick.AddListener(() => GetComponent<Player>().ThrowTrap(b.name));
+
+            var obj = p.Find(MobileButtonsName);
+            if (obj != null)
+            {
+                obj.GetChild(0).GetComponent<Button>().onClick.AddListener(() => GetComponent<Player>().Attack());
+                obj.GetChild(1).GetComponent<Button>().onClick.AddListener(() => GetComponent<Player>().Jump());
+            }
         }
     }
 }

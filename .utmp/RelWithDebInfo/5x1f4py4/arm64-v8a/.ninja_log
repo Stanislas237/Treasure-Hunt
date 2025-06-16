@@ -1,0 +1,10 @@
+# ninja log v5
+184	5124	7717895742399924	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	aff5c82c1f36b536
+119	5185	7717895742940918	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	b4190191643f88b7
+2	5198	7717895743105473	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	7b58e8daa1d24e06
+301	5238	7717895743615667	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	a1515eee7d8d0d7
+220	5423	7717895745635351	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	184c33768ee913d6
+24	5571	7717895747221342	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	69ca5e89fff0613b
+202	5931	7717895750964711	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	e5b865af4160539e
+48	6217	7717895753867480	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	3f55f08c72bee247
+6217	6556	7717895757209468	C:/Users/STANISLAS KAMGA/Documents/GitHub/Treasure-Hunt/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/5x1f4py4/obj/arm64-v8a/libgame.so	bacfa820c58d4b3
