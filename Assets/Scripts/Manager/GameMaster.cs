@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Mirror;
 
 public class GameMaster : MonoBehaviour
@@ -15,20 +16,38 @@ public class GameMaster : MonoBehaviour
 
     private List<GameObject> PrefabsToModify;
 
+    public Dictionary<string, AudioClip> Sounds;
+
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
         else
         {
-            Destroy(this);
+            Destroy(gameObject);
             return;
         }
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Init()
+    private void Start()
     {
+        // Load all sounds
+        Sounds = new()
+        {
+            { "Click", Resources.Load<AudioClip>("Sounds/Click") },
+            { "End", Resources.Load<AudioClip>("Sounds/EndGame") },
+            { "Text", Resources.Load<AudioClip>("Sounds/TextPaste") },
+            { "LastText", Resources.Load<AudioClip>("Sounds/LastTextPaste") },
+            { "Bow", Resources.Load<AudioClip>("Sounds/Bow") },
+            { "Sword", Resources.Load<AudioClip>("Sounds/Sword") },
+            { "Hit", Resources.Load<AudioClip>("Sounds/Hit") },
+            { "Coin", Resources.Load<AudioClip>("Sounds/Coin") },
+            { "Treasure", Resources.Load<AudioClip>("Sounds/Treasure") },
+            { "Mud", Resources.Load<AudioClip>("Sounds/Mud") },
+            { "Spike", Resources.Load<AudioClip>("Sounds/Spike") }
+        };
+
         // Load all prefabs
         PrefabsToModify = new()
         {
@@ -47,9 +66,27 @@ public class GameMaster : MonoBehaviour
         GameManager.TreasurePrefab = PrefabsToModify[4];
     }
 
+    public static void PlayClip2D(string clip, float volume = 1f)
+    {
+        GameObject tempGO = new GameObject("TempAudio2D");
+        AudioSource aSource = tempGO.AddComponent<AudioSource>();
+        aSource.volume = volume;
+        aSource.spatialBlend = 0f;
+        aSource.PlayOneShot(Instance.Sounds[clip]);
+        Destroy(tempGO, Instance.Sounds[clip].length);
+    }
+
+    public void AddSoundOnButtons()
+    {
+        foreach (var b in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            b.onClick.AddListener(() => PlayClip2D("Click"));
+            b.navigation = new(){ mode = Navigation.Mode.None };
+        }
+    }
+
     public void LaunchGame()
     {
-        Init();
         if (GameType == typeof(GameManager))
             SetSoloMode();
         else

@@ -6,6 +6,16 @@ public class NPlayer : NetworkBehaviour
 {
 
     #region Synced Vars and Commands
+    [SyncVar(hook = nameof(OnTimeChanged))]
+    public float exactTime = 180;
+
+    void OnTimeChanged(float _, float value)
+    {
+        if (isLocalPlayer)
+            GameManager.timeLeft = value;
+    }
+
+
     [SyncVar(hook = nameof(OnNameChanged))]
     public string playerName = string.Empty;
 
@@ -119,11 +129,17 @@ public class NPlayer : NetworkBehaviour
             CmdSetName(GameManager.PlayerName);
         else
             Destroy(txtCtn.GetChild(2).gameObject);
+
+        if (NetworkServer.active)
+            exactTime = GameManager.timeLeft;
     }
 
     public override void OnStopClient()
     {
-        Destroy(playerUI.rectTransform);
-        GameManager.Players.Remove(player);
+        Destroy(playerUI.rectTransform.gameObject);
+        GameManager.Instance.Players.Remove(player);
+
+        if (isLocalPlayer)
+            Tools.LoadScene(name, "Menu");
     }
 }

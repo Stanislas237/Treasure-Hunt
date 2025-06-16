@@ -24,20 +24,23 @@ public class RoomPlayerManager : NetworkBehaviour
 
     private void Start()
     {
+        GameMaster.Instance.AddSoundOnButtons();
         InvokeRepeating(nameof(UpdateUI), 1, 1);
 
         if (GameMaster.IsHost)
         {
+            // Debug.LogError("Lancement de l'hote à l'adresse ?? " + Singleton.networkAddress);
             Singleton.StartHost();
-            FindFirstObjectByType<CustomDiscovery>(FindObjectsInactive.Include).AdvertiseServer();
+            FindFirstObjectByType<CustomDiscovery>().AdvertiseServer();
         }
         else
         {
             if (!string.IsNullOrEmpty(GameMaster.Address))
                 Singleton.networkAddress = GameMaster.Address;
-                
+
+            // Debug.LogError("Lancement du client à l'adresse" + Singleton.networkAddress);
             Singleton.StartClient();
-            Destroy(FindFirstObjectByType<CustomDiscovery>(FindObjectsInactive.Include).gameObject);
+            Destroy(FindFirstObjectByType<CustomDiscovery>().gameObject);
         }
     }
 
@@ -119,6 +122,7 @@ public class RoomPlayerManager : NetworkBehaviour
             var b = element.GetChild(2).GetComponent<Button>().onClick;
             b.RemoveAllListeners();
             b.AddListener(action);
+            b.AddListener(() => GameMaster.PlayClip2D("Click"));
         }
     }
 
@@ -141,6 +145,6 @@ public class RoomPlayerManager : NetworkBehaviour
             Singleton.StopHost();
         else
             Singleton.StopClient();
-        Tools.LoadScene("Menu");
+        Tools.LoadScene(name, "Menu");
     }
 }

@@ -95,7 +95,7 @@ public class Ennemy : Entity
         float closestDistance = Mathf.Infinity;
         closestTreasure = null;
 
-        foreach (Transform treasure in GameManager.SpawnedTreasures)
+        foreach (Transform treasure in GameManager.Instance.SpawnedTreasures)
         {
             float distance = Vector3.Distance(transform.position, treasure.position);
             if (distance < closestDistance)

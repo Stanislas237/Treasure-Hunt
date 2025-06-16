@@ -4470,7 +4470,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f96779f7ec93604e891960515cc4138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawnInterval: 15
   timerText: {fileID: 1123054029}
   EndGamePanel: {fileID: 463683391}
 --- !u!114 &1344005510
@@ -4485,7 +4484,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 022024f763a08bd41bd381d17221067e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawnInterval: 15
   timerText: {fileID: 1123054029}
   EndGamePanel: {fileID: 463683391}
 --- !u!1 &1430861060

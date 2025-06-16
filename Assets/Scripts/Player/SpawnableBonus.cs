@@ -26,8 +26,8 @@ public abstract class SpawnableBonus : MonoBehaviour
 
     void OnDisable()
     {
-        if (GameManager.SpawnedTreasures.Contains(transform))
-            GameManager.SpawnedTreasures.Remove(transform); // Remove from the list of spawned treasures when disabled
+        if (GameManager.Instance.SpawnedTreasures.Contains(transform))
+            GameManager.Instance.SpawnedTreasures.Remove(transform); // Remove from the list of spawned treasures when disabled
     }
 
     protected abstract void ApplyBonus(Entity e);

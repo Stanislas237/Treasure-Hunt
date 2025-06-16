@@ -4,8 +4,6 @@ using Mirror;
 
 public class NetworkingManager : GameManager
 {
-    public static NetworkingManager Instance;
-
     protected override bool Awake()
     {
         if (!base.Awake())
@@ -13,7 +11,6 @@ public class NetworkingManager : GameManager
 
         foreach (var entity in FindObjectsByType<Entity>(FindObjectsSortMode.None))
             Destroy(entity.gameObject);
-        Instance = this;
         return true;
     }
 
@@ -21,11 +18,15 @@ public class NetworkingManager : GameManager
     protected override void InstantiateCoin()
     {
         if (NetworkServer.active)
-            Players[0].nPlayer.CmdSpawnObject(Random.Range(0, 10) > 7 ? "Treasure" : "Coin",
+            Players[0]?.nPlayer.CmdSpawnObject(Random.Range(0, 10) > 7 ? "Treasure" : "Coin",
             GenerateRandomPointInOval(), Quaternion.Euler(0, 0, 90));
     }
-    
-    public static void NetworkDestroy(GameObject target, float delay) => Instance.StartCoroutine(Instance.DestroyCoroutine(target, delay));
+
+    public static void NetworkDestroy(GameObject target, float delay)
+    {
+        if (Instance is NetworkingManager NTM)
+            NTM.StartCoroutine(NTM.DestroyCoroutine(target, delay));
+    }
 
     IEnumerator DestroyCoroutine(GameObject target, float delay)
     {

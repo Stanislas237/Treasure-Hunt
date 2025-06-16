@@ -7,41 +7,39 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField]
-    private float SpawnInterval;
+    private const float SpawnInterval = 15f;
     [SerializeField]
     private TextMeshProUGUI timerText;
     [SerializeField]
     private Transform EndGamePanel;
-    private float timeLeft = 5;
 
+    public static float timeLeft = 180;
     public static GameObject CoinPrefab;
     public static GameObject TreasurePrefab;
-    public static List<Transform> SpawnedTreasures { get; private set; } = new();
-    public static List<Entity> Players { get; private set; } = new();
+    public List<Transform> SpawnedTreasures { get; private set; } = new();
+    public List<Entity> Players { get; private set; } = new();
 
     public static string PlayerName { get; private set; } = string.Empty;
 
     public static NetworkManager networkManager;
+    public static GameManager Instance;
 
     protected virtual bool Awake()
     {
-        networkManager = FindFirstObjectByType<NetworkManager>(FindObjectsInactive.Include);
-
-        SpawnedTreasures = new();
-        Players = new();
-
         if (GetType() != GameMaster.GameType)
         {
             Destroy(this);
             return false;
         }
 
+        Instance = this;
+        if (networkManager == null)
+            networkManager = FindFirstObjectByType<NetworkManager>(FindObjectsInactive.Include);
+
         try { GameMaster.Instance.LaunchGame(); }
         catch { FindFirstObjectByType<GameMaster>().LaunchGame(); }
 
-        if (networkManager)
-            Destroy(networkManager.gameObject);
+        GameMaster.Instance.AddSoundOnButtons();
 
         return true;
     }
@@ -94,12 +92,14 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
         textElement.fontSize = targetSize;
+        GameMaster.PlayClip2D(targetSize == 150 ? "LastText" : "Text");
     }
 
     private IEnumerator EndGame()
     {
         CancelInvoke();
         EndGamePanel.parent.GetChild(0).gameObject.SetActive(false);
+        GameMaster.PlayClip2D("End");
 
         // Récupérer le joueur local et le plus haut score
         int maxPoints = 0, nbMaxPoints = 0;

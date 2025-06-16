@@ -8,7 +8,7 @@ public class Menu : MonoBehaviour
 {
     private bool isSearchingServer = false;
 
-    private CustomDiscovery discovery;
+    private CustomDiscovery discovery = null;
 
     [SerializeField]
     Animator PanelAnimator;
@@ -18,6 +18,7 @@ public class Menu : MonoBehaviour
 
     void Start()
     {
+        GameMaster.Instance.AddSoundOnButtons();
         GameManager.SetName(PlayerPrefs.GetString("PlayerName", string.Empty));
         inputField.text = GameManager.PlayerName;
         inputField.onValueChanged.AddListener(newText =>
@@ -27,6 +28,7 @@ public class Menu : MonoBehaviour
             PlayerPrefs.Save();
         });
 
+        discovery = GetComponent<CustomDiscovery>();
         var manager = FindFirstObjectByType<NetworkManager>(FindObjectsInactive.Include);
         if (manager)
             Destroy(manager.gameObject);
@@ -39,7 +41,7 @@ public class Menu : MonoBehaviour
 
         GameMaster.GameType = typeof(NetworkingManager);
         GameMaster.IsHost = true;
-        Tools.LoadScene("Waiting");
+        Tools.LoadScene(name, "Waiting");
     }
 
     public void OnClickJoin() => StartCoroutine(Join());
@@ -50,25 +52,24 @@ public class Menu : MonoBehaviour
             yield break;
 
         isSearchingServer = true;
-        PanelAnimator.Play("Searching");
+        PanelAnimator.Play("Searching");            
 
-        discovery = FindFirstObjectByType<CustomDiscovery>();
-        discovery.OnServerFound.AddListener(response =>
+        discovery.onServerDiscovered = address =>
         {
             GameMaster.IsHost = false;
-            GameMaster.Address = response.uri;
-            Tools.LoadScene("Waiting");
-        });
+            GameMaster.Address = address;
+            Tools.LoadScene(name, "Waiting");
+        };
 
         GameMaster.GameType = typeof(NetworkingManager);
-        discovery.StartDiscovery();
+        discovery?.StartDiscovery();
 
         yield return null;
         yield return new WaitForSeconds(PanelAnimator.GetCurrentAnimatorStateInfo(0).length);
         
-        discovery.StopDiscovery();
+        discovery?.StopDiscovery();
         isSearchingServer = false;
-        Debug.Log("Recherche de serveurs terminée.");
+        // Debug.Log("Recherche de serveurs terminée.");
     }
 
     public void OnClickPlay()
@@ -77,7 +78,7 @@ public class Menu : MonoBehaviour
             return;
 
         GameMaster.GameType = typeof(GameManager);
-        Tools.LoadScene("Game");
+        Tools.LoadScene(name, "Game");
     }
 
     private bool IncorrectName()
@@ -91,5 +92,9 @@ public class Menu : MonoBehaviour
 
 public static class Tools
 {
-    public static void LoadScene(string name) => SceneManager.LoadScene(name);
+    public static void LoadScene(string MyName, string name)
+    {
+        Debug.Log("Calling load from " + MyName);
+        SceneManager.LoadScene(name);
+    }
 }

@@ -614,7 +614,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enableActiveDiscovery: 0
   BroadcastAddress: 
-  serverBroadcastListenPort: 47777
+  serverBroadcastListenPort: 49999
   ActiveDiscoveryInterval: 3
   transport: {fileID: 1471207814}
   OnServerFound:
@@ -1001,7 +1001,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  port: 7777
+  port: 9999
   DualMode: 1
   NoDelay: 1
   Interval: 10

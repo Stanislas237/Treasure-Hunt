@@ -12,7 +12,12 @@ public class RoomPlayer : NetworkRoomPlayer
     {
         CmdRemovePlayer(netId);
         base.OnStopLocalPlayer();
-        Tools.LoadScene("Menu");
+    }
+
+    public override void OnStopClient()
+    {
+        if (isLocalPlayer)
+            Tools.LoadScene(name, "Menu");
     }
 
     [Command]

@@ -102,7 +102,7 @@ public abstract class Entity : MonoBehaviour
 
     protected virtual bool Start()
     {
-        GameManager.Players.Add(this);
+        GameManager.Instance.Players.Add(this);
 
         // Weapons held
         Sword = transform.GetComponentsInChildren<Transform>().FirstOrDefault(child => child.name == "Sword")?.gameObject;
@@ -296,6 +296,8 @@ public abstract class Entity : MonoBehaviour
         catch { }
     }
 
+    public void PlaySound(string name) => GameMaster.PlayClip2D(name);
+
     public void TakeDamage(int damage)
     {
         AddPoints(-damage); // Soustraire les points en fonction des dégâts subis
@@ -314,6 +316,7 @@ public abstract class Entity : MonoBehaviour
             if (trapPrefab != null)
             {
                 trapQuantities[trapType]--;
+                GameMaster.PlayClip2D(trapType);
 
                 if (nPlayer == null)
                     Instantiate(trapPrefab, transform.position - transform.forward * 1.5f + Vector3.up * 0.1f, Quaternion.identity);

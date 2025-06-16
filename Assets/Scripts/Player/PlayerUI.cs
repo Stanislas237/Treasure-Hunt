@@ -76,14 +76,17 @@ public class PlayerUI : MonoBehaviour
             MudText = p.GetChild(1).GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
             SpikeText = p.GetChild(1).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
 
-            p.parent.GetChild(1).GetChild(3).GetComponent<Button>().onClick.AddListener(() => Tools.LoadScene("Menu"));
-            p.GetChild(3).GetComponent<Button>().onClick.AddListener(() => {
+            p.parent.GetChild(1).GetChild(3).GetComponent<Button>().onClick.AddListener(LogOut);
+            p.GetChild(3).GetComponent<Button>().onClick.AddListener(LogOut);
+
+            static void LogOut()
+            {
                 if (GameMaster.IsHost)
-                    GameManager.networkManager.StopHost();
+                    GameManager.networkManager?.StopHost();
                 else
-                    GameManager.networkManager.StopClient();
-                Tools.LoadScene("Menu");
-            });
+                    GameManager.networkManager?.StopClient();
+                Tools.LoadScene("PlayerUI", "Menu");
+            }
         }
 
         if (!TryGetComponent(out NPlayer nPlayer) || nPlayer.isLocalPlayer)
