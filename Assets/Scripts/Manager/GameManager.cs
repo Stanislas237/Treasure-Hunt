@@ -102,18 +102,13 @@ public class GameManager : MonoBehaviour
         GameMaster.PlayClip2D("End");
 
         // Récupérer le joueur local et le plus haut score
-        int maxPoints = 0, nbMaxPoints = 0;
+        int maxPoints = Players.Max(e => e.BonusPoints);
+        int nbMaxPoints = Players.Count(e => e.BonusPoints == maxPoints);
+
         Player localPlayer = null;
         foreach (var e in Players)
-        {
-            if (e.BonusPoints > maxPoints)
-            {
-                maxPoints = e.BonusPoints;
-                nbMaxPoints++;
-            }
             if (e is Player p) if (p.enabled)
                 localPlayer = p;
-        }
 
         // Décider s'il gagne, perd, ou égalité
         Decision d;

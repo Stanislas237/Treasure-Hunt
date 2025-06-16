@@ -4,10 +4,20 @@ using UnityEngine.InputSystem;
 
 public class Player : Entity
 {
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
     /// <summary>
-    /// Input system for player actions.
+    /// Input system for Mobile actions.
+    /// </summary>
+    private JoyStick joyStick;
+
+#else
+    /// <summary>
+    /// Input system for PC actions.
     /// </summary>
     private PlayerInputActions inputActions;
+
+    private void OnDisable() => inputActions?.Player.Disable();
+#endif
 
     /// <summary>
     /// UI component to display player points.
@@ -24,6 +34,17 @@ public class Player : Entity
             return false;
 
         // Initialize input actions
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
+        joyStick = FindFirstObjectByType<JoyStick>(FindObjectsInactive.Include);
+
+        joyStick.OnMove = vector =>
+        {
+            if (vector == Vector2.zero)
+                StopMove();
+            else
+                InitMove(vector);
+        };
+#else
         inputActions = new();
         inputActions.Player.Enable();
 
@@ -36,10 +57,9 @@ public class Player : Entity
             if (trapQuantities["Mud"] > 0) ThrowTrap("Mud");
             else ThrowTrap("Spike");
         };
+#endif
         return true;
     }
-
-    private void OnDisable() => inputActions?.Player.Disable();
 
     public override void EquipWeapon(string newWeapon)
     {

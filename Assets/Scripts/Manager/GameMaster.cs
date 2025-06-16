@@ -37,6 +37,7 @@ public class GameMaster : MonoBehaviour
         {
             { "Click", Resources.Load<AudioClip>("Sounds/Click") },
             { "End", Resources.Load<AudioClip>("Sounds/EndGame") },
+            { "Error", Resources.Load<AudioClip>("Sounds/Error") },
             { "Text", Resources.Load<AudioClip>("Sounds/TextPaste") },
             { "LastText", Resources.Load<AudioClip>("Sounds/LastTextPaste") },
             { "Bow", Resources.Load<AudioClip>("Sounds/Bow") },

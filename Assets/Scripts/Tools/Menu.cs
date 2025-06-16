@@ -39,21 +39,31 @@ public class Menu : MonoBehaviour
         if (isSearchingServer || IncorrectName())
             return;
 
-        GameMaster.GameType = typeof(NetworkingManager);
-        GameMaster.IsHost = true;
-        Tools.LoadScene(name, "Waiting");
+        isSearchingServer = true;
+        StartCoroutine(Host());
     }
 
-    public void OnClickJoin() => StartCoroutine(Join());
+    IEnumerator Host()
+    {
+        yield return new WaitForSeconds(0.3f);
+
+        GameMaster.GameType = typeof(NetworkingManager);
+        GameMaster.IsHost = true;
+        Tools.LoadScene(name, "Waiting");        
+    }
+
+    public void OnClickJoin()
+    {
+        if (isSearchingServer || IncorrectName())
+            return;
+
+        isSearchingServer = true;
+        StartCoroutine(Join());
+    }
 
     IEnumerator Join()
     {
-        if (isSearchingServer || IncorrectName())
-            yield break;
-
-        isSearchingServer = true;
-        PanelAnimator.Play("Searching");            
-
+        PanelAnimator.Play("Searching");
         discovery.onServerDiscovered = address =>
         {
             GameMaster.IsHost = false;
@@ -69,13 +79,20 @@ public class Menu : MonoBehaviour
         
         discovery?.StopDiscovery();
         isSearchingServer = false;
-        // Debug.Log("Recherche de serveurs terminée.");
     }
 
     public void OnClickPlay()
     {
         if (isSearchingServer || IncorrectName())
             return;
+
+        isSearchingServer = true;
+        StartCoroutine(Play());
+    }
+
+    IEnumerator Play()
+    {
+        yield return new WaitForSeconds(0.3f);
 
         GameMaster.GameType = typeof(GameManager);
         Tools.LoadScene(name, "Game");
@@ -84,7 +101,10 @@ public class Menu : MonoBehaviour
     private bool IncorrectName()
     {
         if (string.IsNullOrEmpty(GameManager.PlayerName))
+        {
             PanelAnimator.Play("EnterName");
+            GameMaster.PlayClip2D("Error");
+        }
         return string.IsNullOrEmpty(GameManager.PlayerName);
     }
 }
@@ -94,7 +114,6 @@ public static class Tools
 {
     public static void LoadScene(string MyName, string name)
     {
-        Debug.Log("Calling load from " + MyName);
         SceneManager.LoadScene(name);
     }
 }

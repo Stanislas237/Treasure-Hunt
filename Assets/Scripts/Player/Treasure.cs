@@ -4,7 +4,7 @@ public class Treasure : SpawnableBonus
 {
     protected override void ApplyBonus(Entity e)
     {
-        if (e.enabled)
+        if (e is Player p && e.enabled)
             GameMaster.PlayClip2D("Treasure");
             
         e.AddPoints(40); // Add points to the entity
