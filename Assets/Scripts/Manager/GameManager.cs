@@ -7,13 +7,13 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
-    private const float SpawnInterval = 15f;
+    private const int SpawnInterval = 15;
     [SerializeField]
     private TextMeshProUGUI timerText;
     [SerializeField]
     private Transform EndGamePanel;
 
-    public static float timeLeft = 180;
+    public float timeLeft = 181;
     public static GameObject CoinPrefab;
     public static GameObject TreasurePrefab;
     public List<Transform> SpawnedTreasures { get; private set; } = new();
@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
 
     public static string PlayerName { get; private set; } = string.Empty;
 
-    public static NetworkManager networkManager;
+    public NetworkManager networkManager;
     public static GameManager Instance;
 
     protected virtual bool Awake()

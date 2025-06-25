@@ -91,9 +91,9 @@ public class PlayerUI : MonoBehaviour
             static void LogOut()
             {
                 if (GameMaster.IsHost)
-                    GameManager.networkManager?.StopHost();
+                    GameManager.Instance.networkManager?.StopHost();
                 else
-                    GameManager.networkManager?.StopClient();
+                    GameManager.Instance.networkManager?.StopClient();
                 Tools.LoadScene("PlayerUI", "Menu");
             }
         }

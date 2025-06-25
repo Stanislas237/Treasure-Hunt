@@ -9,11 +9,10 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 public class JoyStick : MonoBehaviour
 {
-#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS
     [SerializeField]
     RectTransform joystickBase;
     int fingerId = -1;
-    Canvas canvas = null;
 
     // OutPut
     private Vector2 _inputVector = Vector2.zero;
@@ -88,7 +87,7 @@ public class JoyStick : MonoBehaviour
         if (IsValidVector2(newPos))
             joystickBase.localPosition = newPos;
         
-        var delta = touch.delta.normalized;
+        var delta = (touch.screenPosition - touch.startScreenPosition).normalized;
         if (delta.sqrMagnitude > 0.25)
             inputVector = delta;
     }
@@ -96,7 +95,7 @@ public class JoyStick : MonoBehaviour
     private void Start()
     {
         foreach (var g in GameObject.FindGameObjectsWithTag("Mobile"))
-            Destroy(g);
+            Destroy(g.gameObject);
         Destroy(this);
     }
 #endif

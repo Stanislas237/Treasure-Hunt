@@ -107,8 +107,8 @@ public class GameMaster : MonoBehaviour
             if (prefab.TryGetComponent(out NetworkTransformUnreliable nt))
                 nt.enabled = true;
 
-            if (!NetworkingManager.networkManager.spawnPrefabs.Contains(prefab))
-                NetworkingManager.networkManager.spawnPrefabs.Add(prefab);
+            if (!NetworkingManager.Instance.networkManager.spawnPrefabs.Contains(prefab))
+                NetworkingManager.Instance.networkManager.spawnPrefabs.Add(prefab);
         }
         Debug.Log("Multiplayer mode set, prefabs updated.");
     }

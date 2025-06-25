@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 public class Player : Entity
 {
-#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS
     /// <summary>
     /// Input system for Mobile actions.
     /// </summary>
@@ -34,7 +34,7 @@ public class Player : Entity
             return false;
 
         // Initialize input actions
-#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS
         joyStick = FindFirstObjectByType<JoyStick>(FindObjectsInactive.Include);
 
         joyStick.OnMove = vector =>

@@ -12,7 +12,7 @@ public class NPlayer : NetworkBehaviour
     void OnTimeChanged(float _, float value)
     {
         if (isLocalPlayer)
-            GameManager.timeLeft = value;
+            GameManager.Instance.timeLeft = value;
     }
 
 
@@ -131,7 +131,7 @@ public class NPlayer : NetworkBehaviour
             Destroy(txtCtn.GetChild(2).gameObject);
 
         if (NetworkServer.active)
-            exactTime = GameManager.timeLeft;
+            exactTime = GameManager.Instance.timeLeft;
     }
 
     public override void OnStopClient()
